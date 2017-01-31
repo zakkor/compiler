@@ -5,7 +5,8 @@
 #include <stdexcept>
 #include <vector>
 
-#include "lexer.hpp"
+#include "token.hpp"
+#include "error.hpp"
 
 enum class NodeType {
     Var,
@@ -14,6 +15,7 @@ enum class NodeType {
 
 class ASTNode {
 public:
+    NodeType type;
     virtual void execute() {
         throw -1;
     };
@@ -24,8 +26,6 @@ public:
 
 class VarNode : public ASTNode {
 public:
-    VarNode(int val) : val(val) {}
-
     std::string name;
     int val;
 
@@ -53,12 +53,22 @@ public:
     }
 };
 
+class SequenceNode : public ASTNode {
+public:
+    std::vector<ASTNode*> seq;
+
+    // contains a sequence of execute()-able nodes (statements)
+    virtual void execute() {
+        for (auto stmt : seq) {
+            stmt->execute();
+        }
+    }
+};
+
 class IfNode : public ASTNode {
 public:
-    IfNode(ASTNode *cond, ASTNode *ifBody, ASTNode *elseBody)
-        : cond(cond), ifBody(ifBody), elseBody(elseBody) {}
-
-    ASTNode *cond, *ifBody, *elseBody;
+    ASTNode *cond;
+    SequenceNode *ifBody, *elseBody;
 
     virtual void execute() {
         if (ifBody && cond->get()) {
@@ -69,18 +79,30 @@ public:
     }
 };
 
-class StartNode : public ASTNode {
+class AssignNode : public ASTNode {
 public:
-    StartNode(ASTNode *next) : next(next) {}
-    ASTNode *next;
-
+    VarNode* lhs;
+    ASTNode* rhs;
     virtual int get() {
-        return next->get();
+        lhs->val = rhs->get();
+        return lhs->val;
     }
 };
 
 class Parser {
 public:
     void parse(std::vector<Token> tokens);
-    ASTNode *root;
+    ASTNode* parseExpr(std::vector<Token>::iterator& t, const std::string& terminator);
+    ASTNode* parseStatement(std::vector<Token>::iterator& t, const std::string& terminator);
+    static inline void consume(std::vector<Token>::iterator& t, const std::string& requiredType) {
+        auto type = t->type();
+        if (type != requiredType) {
+            throw SyntacticException("Error: illegal token: have '" + type + "', need '"
+                                     + requiredType + "'\n");
+        }
+
+        ++t; // eat token
+    }
+    void print();
+    SequenceNode *root;
 };

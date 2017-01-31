@@ -7,25 +7,14 @@
 #include <regex>
 
 #include "util.hpp"
-
-class Token {
-private:
-    std::string data;
-public:
-    Token(std::string data) : data(data) {}
-    size_t size() const;
-    std::string operator[](size_t idx) const;
-    std::string type() const;
-    int param() const;
-    std::string full() const;
-};
+#include "token.hpp"
 
 class Lexer {
 public:
     Lexer() {
         std::vector<std::pair<std::string, std::string>> staticRules, paramRules;
         paramRules = {
-            {R"(\b[^\d\W]+\b)", "IDENT $0"},
+            {R"(\b(?!.*if)(?!.*else)[^\d\W]+\b)", "IDENT $0"},
             {R"([0-9])", "NUMBER $0"},
         };
 
@@ -36,9 +25,13 @@ public:
             {R"(\*)", "MUL"},
             {R"(\()", "OPAREN"},
             {R"(\))", "CPAREN"},
-            {R"((:\=))", "DEC"},
+            {R"((:\=))", "DECL"},
             {R"(\=)", "ASSIGN"},
             {R"(\;)", "TERM"},
+            {R"(if)", "KEYIF"},
+            {R"(\{)", "OBRACE"},
+            {R"(\})", "CBRACE"},
+            {R"(else)", "KEYELSE"},
         };
 
         // order matters
@@ -47,6 +40,7 @@ public:
     }
 
     void scan(const std::string& filename);
+    void print();
 
     std::vector<std::vector<std::pair<std::string, std::string>>> rules;
 

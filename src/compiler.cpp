@@ -4,12 +4,10 @@
 int main() {
     Lexer lex;
     lex.scan("test.ed");
-
-    for (auto t : lex.tokens) {
-        std::cout << t.full() << std::endl;
-    }
+//    lex.print();
 
     Parser par;
     par.parse(lex.tokens);
-    std::cout << "Result: " << par.root->get();
+    std::cout << par.root->seq.size() << " top-level nodes.";
+//    par.root->execute();
 }

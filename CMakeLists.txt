@@ -7,6 +7,7 @@ set(SOURCE_FILES
   src/compiler.cpp
   src/parser.cpp
   src/lexer.cpp
+  src/token.cpp
   )
 
 add_executable(Compiler ${SOURCE_FILES})

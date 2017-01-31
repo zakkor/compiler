@@ -1,0 +1,14 @@
+number : 0|1|...|9
+ident : [a-z|A-Z]
+expr : number/ident +/- ... TERM ( ; )
+
+# assignment:
+ident = expr
+
+# if
+if expr TERM ( { )
+   expr 1
+   expr 2
+   ...
+   expr n
+TERM ( } )
