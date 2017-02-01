@@ -1,14 +1,68 @@
 number : 0|1|...|9
 ident : [a-z|A-Z]
-expr : number/ident +/- ... TERM ( ; )
+expr : number/ident +/- ... ;
+
 
 # assignment:
 ident = expr
 
+# declare and assign
+ident := expr
+
 # if
-if expr TERM ( { )
-   expr 1
-   expr 2
-   ...
-   expr n
-TERM ( } )
+if expr {
+	expr 1
+	expr 2
+	...
+	expr n
+}
+
+# else (requires previous if)
+else expr {
+	expr 1
+	expr 2
+	...
+	expr n
+}
+
+// note:   :: means "has the type"
+
+// struct definition
+ident :: {
+	int x;
+	int y;
+}
+// read as: has the type { int x; int y }; (composite type)
+
+// note! void functions do not exist, because they do not make any sense:
+// use a constant instead (this is because global variables do not exist)
+
+// func definition
+ident :: int a {
+	body b
+}
+// read as: has the type "of something that takes an int and has the body b"
+// note: this is also a method: it can be called as 
+// 3.ident();
+// or ident(3);
+// (first argument can be used as a receiver; both versions are equivalent)
+
+// alias
+type :: anotherType;
+// read as: has the type anotherType
+
+# illegal:
+// function with no arguments returning void
+function :: {} // this would actually be considered a struct
+
+// function with no arguments returning something
+function :: -> int {} // cannot have a STRUCT returning something
+// solution: use a constant
+
+# more examples
+
+f := Foo(); // implicit constructor
+add :: Foo f, i32 x, i32 y {}
+f.add(2, 3); // first arg can be used as receiver
+// or
+add(f, 2, 3); // exactly the same
