@@ -4,7 +4,7 @@
 int main() {
     Lexer lex;
     lex.scan("test.ed");
-//    lex.print();
+    lex.print();
 
     Parser par;
     par.parse(lex.tokens);

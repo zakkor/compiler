@@ -74,15 +74,23 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
         auto var = new VarNode();
         var->name = t->name();
 
-        consume(t, "IDENT"); // @Error: maybe add detailed error?
-        // identifier must be followed by assignment
-        auto assign = new AssignNode();
-        assign->lhs = var;
+        consume(t, "IDENT");
 
-        // third token (start of expr ( IDENT|NUMBER ))
-        consume(t, "ASSIGN");
-        assign->rhs = parseExpr(t, "TERM");
-        return assign;
+        // identifier must be followed by assignment or declaration
+        type = t->type();
+        if (type == "ASSIGN") {
+            auto assign = new AssignNode();
+            assign->lhs = var;
+            consume(t, "ASSIGN");
+            assign->rhs = parseExpr(t, "TERM");
+            return assign;
+        } else if (type == "DECL") {
+            auto decl = new DeclNode();
+            decl->lhs = var;
+            consume(t, "DECL");
+            decl->rhs = parseExpr(t, "TERM");
+            return decl;
+        }
     } else if (type == "KEYIF") {
         auto ifNode = new IfNode();
         consume(t, "KEYIF");

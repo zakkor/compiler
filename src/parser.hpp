@@ -89,6 +89,16 @@ public:
     }
 };
 
+class DeclNode : public ASTNode {
+public:
+    VarNode* lhs;
+    ASTNode* rhs;
+    virtual int get() {
+        lhs->val = rhs->get();
+        return lhs->val;
+    }
+};
+
 class Parser {
 public:
     void parse(std::vector<Token> tokens);
