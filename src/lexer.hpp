@@ -14,12 +14,13 @@ public:
     Lexer() {
         std::vector<std::pair<std::string, std::string>> staticRules, paramRules;
         paramRules = {
-            {R"(\b(?!.*if)(?!.*else)[^\d\W]+\b)", "IDENT $0"},
+            {R"(\b(?!.*if)(?!.*else)(?!.*return)[^\d\W]+\b)", "IDENT $0"},
             {R"([0-9])", "NUMBER $0"},
         };
 
         staticRules = {
             {R"(\+)", "ADD"},
+            {R"(->)", "HASRET"},
             {R"(\-)", "SUB"},
             {R"(\/)", "DIV"},
             {R"(\*)", "MUL"},
@@ -29,8 +30,11 @@ public:
             {R"(\=)", "ASSIGN"},
             {R"(\;)", "TERM"},
             {R"(if)", "KEYIF"},
+            {R"(return)", "KEYRET"},
             {R"(\{)", "OBRACE"},
             {R"(\})", "CBRACE"},
+            {R"(::)", "HASTYPE"},
+            {R"(,)", "COMMA"},
             {R"(else)", "KEYELSE"},
         };
 

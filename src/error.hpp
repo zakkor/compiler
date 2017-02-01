@@ -8,3 +8,10 @@ public:
         std::runtime_error(msg)
         {}
 };
+
+class ASTException : public std::runtime_error {
+public:
+    ASTException(std::string const& msg) :
+        std::runtime_error(msg)
+        {}
+};

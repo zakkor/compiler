@@ -25,43 +25,61 @@ else expr {
 	expr n
 }
 
-// note:   :: means "has the type"
+// func definition
+[optional]
+
+IDENT HASTYPE [IDENT IDENT, ...] OBRACE
+	stmt
+	...
+CBRACE
+
+// example
+ident :: int a {
+	a + = 1;
+}
+
 
 // struct definition
-ident :: {
+:: = HASTYPE
+struct = KEYSTRUCT
+
+IDENT HASTYPE KEYSTRUCT OBRACE
+	stmt
+	...
+CBRACE
+
+// example:
+Foo :: struct {
 	int x;
 	int y;
-}
-// read as: has the type { int x; int y }; (composite type)
 
-// note! void functions do not exist, because they do not make any sense:
-// use a constant instead (this is because global variables do not exist)
-
-// func definition
-ident :: int a {
-	body b
+	addThem :: int -> int { // later on
+ 		return x + y;
+	}
 }
-// read as: has the type "of something that takes an int and has the body b"
-// note: this is also a method: it can be called as 
-// 3.ident();
-// or ident(3);
-// (first argument can be used as a receiver; both versions are equivalent)
+
+f := Foo{2, 3};
+f.addThem();
+
+Bar :: Foo { // way later on
+	newFunc :: {
+		print("kek");
+	}
+}
 
 // alias
 type :: anotherType;
+
+// alias and add stuff (inheritance?)
+type :: anotherType {
+	int y; 
+}
 // read as: has the type anotherType
 
-# illegal:
-// function with no arguments returning void
-function :: {} // this would actually be considered a struct
-
-// function with no arguments returning something
-function :: -> int {} // cannot have a STRUCT returning something
-// solution: use a constant
 
 # more examples
 
-f := Foo(); // implicit constructor
+f := Foo{}; // implicit constructor
 add :: Foo f, i32 x, i32 y {}
 f.add(2, 3); // first arg can be used as receiver
 // or

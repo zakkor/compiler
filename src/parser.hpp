@@ -17,11 +17,14 @@ class ASTNode {
 public:
     NodeType type;
     virtual void execute() {
-        throw -1;
+        throw ASTException("No execute method");
     };
     virtual int get() {
-        throw -1;
+        throw ASTException("No get method");
     };
+    virtual void traverseAndPrint() {
+        throw ASTException("No traverse method");
+    }
 };
 
 class VarNode : public ASTNode {
@@ -97,6 +100,14 @@ public:
         lhs->val = rhs->get();
         return lhs->val;
     }
+};
+
+class FuncDeclNode : public ASTNode {
+public:
+    // pair<type, name>
+    std::vector<std::pair<VarNode*, VarNode*>> args;
+    VarNode* returnType;
+    SequenceNode* body;
 };
 
 class Parser {

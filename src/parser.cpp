@@ -66,8 +66,8 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
     // first token ( IDENT ) or ( KEYIF )
     if (type == "KEYELSE")
         throw SyntacticException("Error: else without a previous if\n");
-    if (type != "IDENT" && type != "KEYIF")
-        throw SyntacticException("Error: statement must begin with identifier or if (have " + type + ")\n");
+    if (type != "IDENT" && type != "KEYIF" && type != "KEYRET")
+        throw SyntacticException("Error: statement must begin with def, decl, return, or if (have " + type + ")\n");
 
 
     if (type == "IDENT") {
@@ -76,7 +76,8 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
 
         consume(t, "IDENT");
 
-        // identifier must be followed by assignment or declaration
+        // identifier must be followed by
+        // assignment | declaration | hastype
         type = t->type();
         if (type == "ASSIGN") {
             auto assign = new AssignNode();
@@ -91,7 +92,68 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
             decl->rhs = parseExpr(t, "TERM");
             return decl;
         }
-    } else if (type == "KEYIF") {
+        // is function
+        else if (type == "HASTYPE") {
+            consume(t, "HASTYPE");
+
+            auto funcNode = new FuncDeclNode();
+            auto returnType = new VarNode();
+            returnType->name = "void";
+            funcNode->returnType = returnType;
+
+            // parse optional args + return type
+            while (t->type() != "OBRACE") {
+                if (t->type() == "HASRET") {
+                    consume(t, "HASRET");
+
+                    // get type name //
+                    returnType->name = t->name();
+                    funcNode->returnType = returnType;
+
+                    consume(t, "IDENT");
+                    break;
+                }
+
+                if (t->type() == "IDENT") {
+                    // get type name //
+                    auto argTypeNode = new VarNode();
+                    argTypeNode->name = t->name();
+
+                    // advance
+                    consume(t, "IDENT");
+                    if (t->type() == "IDENT") {
+                        // get arg name //
+                        auto argNameNode = new VarNode();
+                        argNameNode->name = t->name();
+                        funcNode->args.push_back({argTypeNode, argNameNode});
+
+                        consume(t, "IDENT");
+                        // potentially consume a comma if it
+                        // is followed by an identifier
+                        auto maybeIdent = std::next(t, 1);
+                        if (t->type() == "COMMA"
+                            && maybeIdent->type() == "IDENT") {
+                            consume(t, "COMMA");
+                        }
+                    }
+                }
+            }
+
+            consume(t, "OBRACE");
+
+            // parse body
+            auto body = new SequenceNode();
+            while (t->type() != "CBRACE") {
+                body->seq.push_back(parseStatement(t, "CBRACE"));
+            }
+            funcNode->body = body;
+
+            consume(t, "CBRACE");
+
+            return funcNode;
+        }
+    }
+    else if (type == "KEYIF") {
         auto ifNode = new IfNode();
         consume(t, "KEYIF");
 
@@ -120,6 +182,12 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
 
             consume(t, "CBRACE");
         }
+        return ifNode;
+    }
+    // @TODO: add context(functionBody)
+    else if (type == "KEYRET") {
+        consume(t, "KEYRET");
+        return parseExpr(t, "TERM");
     }
 }
 
