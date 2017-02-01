@@ -30,10 +30,9 @@ ASTNode* Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& t
         } else if (type == "SUB") {
             auto newOp = new OPSubNode();
             opStack.push(newOp);
-        } else if (type == terminator) {
-            break;
         } else {
-            throw SyntacticException("Error: illegal token in expression (" + type + ")\n");
+            consume(t, terminator);
+            break;
         }
     }
 
@@ -53,8 +52,6 @@ ASTNode* Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& t
     // only one node left in nodeStack now
     auto retNode = nodeStack.top();
     nodeStack.pop();
-
-    consume(t, terminator);
 
     return retNode;
 }
@@ -168,6 +165,12 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
 
         consume(t, "CBRACE");
 
+        // there can be no else after this because we have
+        // reached the end of the token stream
+        if (t == tokens.end()) {
+            return ifNode;
+        }
+
         // will be either an ELSE or the next statement
         type = t->type();
         if (type == "KEYELSE") {
@@ -184,7 +187,7 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
         }
         return ifNode;
     }
-    // @TODO: add context(functionBody)
+    // @TODO: restrict context(functionBody)
     else if (type == "KEYRET") {
         consume(t, "KEYRET");
         return parseExpr(t, "TERM");
@@ -192,13 +195,12 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
 }
 
 void Parser::parse(std::vector<Token> tokens) {
-    std::cout << "Building AST...";
+    this->tokens = tokens;
     root = new SequenceNode();
 
-    for (auto t = tokens.begin(); t != tokens.end(); /* */) {
+    for (auto t = this->tokens.begin(); t != this->tokens.end(); /* */) {
         root->seq.push_back(parseStatement(t, "TERM"));
     }
-    std::cout << " done\n";
 }
 
 void Parser::print() {

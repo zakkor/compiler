@@ -11,11 +11,17 @@ void Lexer::print() {
 void Lexer::scan(const std::string& filename) {
     std::ifstream file(filename);
 
-    std::cout << "Input is:\n";
+    if (showInput) {
+        std::cout << "Input is:\n";
+    }
 
     std::string line;
     while (std::getline(file, line)) {
-        std::cout << line << "\n";
+
+        if (showInput) {
+            std::cout << line << "\n";
+        }
+
         for (auto const& rule : rules) {
             for (auto const& iter : rule) {
                 std::regex reg(iter.first);

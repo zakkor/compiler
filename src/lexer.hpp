@@ -11,7 +11,7 @@
 
 class Lexer {
 public:
-    Lexer() {
+    Lexer(bool showInput = false) : showInput(showInput) {
         std::vector<std::pair<std::string, std::string>> staticRules, paramRules;
         paramRules = {
             {R"(\b(?!.*if)(?!.*else)(?!.*return)[^\d\W]+\b)", "IDENT $0"},
@@ -47,6 +47,6 @@ public:
     void print();
 
     std::vector<std::vector<std::pair<std::string, std::string>>> rules;
-
     std::vector<Token> tokens;
+    bool showInput;
 };

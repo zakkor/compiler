@@ -1,0 +1,15 @@
+if a - b {
+    if b - c {
+            if c - d {
+                    j = 9;
+                    c = 4;
+            }
+    }
+    else {
+        x = 8;
+    }
+}
+else {
+    y = 9;
+    c = 4 - b;
+}

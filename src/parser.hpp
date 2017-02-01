@@ -115,6 +115,7 @@ public:
     void parse(std::vector<Token> tokens);
     ASTNode* parseExpr(std::vector<Token>::iterator& t, const std::string& terminator);
     ASTNode* parseStatement(std::vector<Token>::iterator& t, const std::string& terminator);
+
     static inline void consume(std::vector<Token>::iterator& t, const std::string& requiredType) {
         auto type = t->type();
         if (type != requiredType) {
@@ -124,6 +125,9 @@ public:
 
         ++t; // eat token
     }
+
     void print();
     SequenceNode *root;
+
+    std::vector<Token> tokens;
 };

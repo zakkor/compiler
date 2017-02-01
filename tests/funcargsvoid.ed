@@ -1,0 +1,8 @@
+foo :: int a, int b, int c {
+    x = 9;
+    b = 5;
+    if x - b {
+       c := 4;
+       j = 2;
+    }
+}
