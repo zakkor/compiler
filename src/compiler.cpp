@@ -8,7 +8,8 @@ int main(int argc, char* argv[]) {
         tester.specify("assign.ed", "decl.ed",
                        "funcargsret.ed", "funcargsvoid.ed",
                        "funcvoidvoid.ed", "if.ed",
-                       "ifelse.ed", "nestedif.ed");
+                       "ifelse.ed", "nestedif.ed",
+                       "functions.ed");
         tester.runAll();
     }
     else {

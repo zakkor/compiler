@@ -14,12 +14,13 @@ ASTNode* Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& t
         type = t->type();
 
         if (type == "NUMBER") {
-            auto newVar = new VarNode();
+            auto newVar = new NumberLiteralNode();
             newVar->val = t->param();
             nodeStack.push(newVar);
 
         } else if (type == "IDENT") {
             auto newVar = new VarNode();
+            newVar->type = new TypeNode();
             newVar->name = t->name();
             newVar->val = 0;
             nodeStack.push(newVar);
@@ -68,8 +69,7 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
 
 
     if (type == "IDENT") {
-        auto var = new VarNode();
-        var->name = t->name();
+        auto identName = t->name();
 
         consume(t, "IDENT");
 
@@ -78,12 +78,19 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
         type = t->type();
         if (type == "ASSIGN") {
             auto assign = new AssignNode();
+            auto var = new VarNode();
+            var->type = new TypeNode();
+            var->name = identName;
             assign->lhs = var;
             consume(t, "ASSIGN");
             assign->rhs = parseExpr(t, "TERM");
             return assign;
-        } else if (type == "DECL") {
+        }
+        else if (type == "DECL") {
             auto decl = new DeclNode();
+            auto var = new VarNode();
+            var->type = new TypeNode();
+            var->name = identName;
             decl->lhs = var;
             consume(t, "DECL");
             decl->rhs = parseExpr(t, "TERM");
@@ -94,7 +101,8 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
             consume(t, "HASTYPE");
 
             auto funcNode = new FuncDeclNode();
-            auto returnType = new VarNode();
+            funcNode->name = identName;
+            auto returnType = new TypeNode();
             returnType->name = "void";
             funcNode->returnType = returnType;
 
@@ -113,7 +121,7 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
 
                 if (t->type() == "IDENT") {
                     // get type name //
-                    auto argTypeNode = new VarNode();
+                    auto argTypeNode = new TypeNode();
                     argTypeNode->name = t->name();
 
                     // advance
@@ -122,7 +130,8 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
                         // get arg name //
                         auto argNameNode = new VarNode();
                         argNameNode->name = t->name();
-                        funcNode->args.push_back({argTypeNode, argNameNode});
+                        argNameNode->type = argTypeNode;
+                        funcNode->args.push_back(argNameNode);
 
                         consume(t, "IDENT");
                         // potentially consume a comma if it

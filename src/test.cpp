@@ -27,7 +27,8 @@ bool Tester::runAll() {
             std::cout << "Test '" << filename << "' failed: " << e.what() << std::endl;
             return false;
         } catch (std::exception& e) {
-            std::cout << ":( something happened\n";
+            std::cout << "Tests failed: " << e.what() << std::endl;
+            return false;
         }
     }
 

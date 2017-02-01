@@ -8,6 +8,8 @@
 #include "token.hpp"
 #include "error.hpp"
 
+static unsigned int nn = 0;
+
 enum class NodeType {
     Var,
     OPAdd,
@@ -27,13 +29,47 @@ public:
     }
 };
 
+class TypeNode : public ASTNode {
+public:
+    TypeNode() : name("?") {}
+    std::string name;
+
+    virtual void traverseAndPrint() {
+        nn++;
+        int cur = nn;
+        std::cout << cur << ";\n";
+        std::cout << cur << "[label=\"Type\\nname=" << name << "\"];" << std::endl;
+    }
+};
+
 class VarNode : public ASTNode {
 public:
     std::string name;
     int val;
+    TypeNode* type;
 
     virtual void traverseAndPrint() {
-        std::cout << "VarNode | name: " << name << " val: " << val << std::endl;
+        nn++;
+        int cur = nn;
+        std::cout << cur << ";\n";
+        std::cout << cur << "[label=\"Var\\nname=" << name << ", val=" << val << "\"];" << std::endl;
+        std::cout << cur << "--"; type->traverseAndPrint();
+    }
+
+    virtual int get() {
+        return val;
+    }
+};
+
+class NumberLiteralNode : public ASTNode {
+public:
+    int val;
+
+    virtual void traverseAndPrint() {
+        nn++;
+        int cur = nn;
+        std::cout << cur << ";\n";
+        std::cout << cur << "[label=\"Number literal\\nval=" << val << "\"];" << std::endl;
     }
 
     virtual int get() {
@@ -57,12 +93,30 @@ public:
     virtual int get() {
         return lhs->get() + rhs->get();
     }
+
+    virtual void traverseAndPrint() {
+        nn++;
+        int cur = nn;
+        std::cout << cur << ";" << std::endl;
+        std::cout << cur << "[label=\"Add\"];" << std::endl;
+        std::cout << cur << "--"; lhs->traverseAndPrint();
+        std::cout << cur << "--"; rhs->traverseAndPrint();
+    }
 };
 
 class OPSubNode : public BinaryOP {
 public:
     virtual int get() {
         return rhs->get() - lhs->get();
+    }
+
+    virtual void traverseAndPrint() {
+        nn++;
+        int cur = nn;
+        std::cout << cur << ";" << std::endl;
+        std::cout << cur << "[label=\"Subtract\"];" << std::endl;
+        std::cout << cur << "--"; lhs->traverseAndPrint();
+        std::cout << cur << "--"; rhs->traverseAndPrint();
     }
 };
 
@@ -78,8 +132,12 @@ public:
     }
 
     virtual void traverseAndPrint() {
+        nn++;
+        int cur = nn;
+        std::cout << cur << ";" << std::endl;
+        std::cout << cur << "[label=\"Sequence\"];" << std::endl;
         for (auto node : seq) {
-            node->traverseAndPrint();
+            std::cout << cur << "--"; node->traverseAndPrint();
         }
     }
 };
@@ -97,20 +155,19 @@ public:
         }
     }
     virtual void traverseAndPrint() {
-        std::cout << "IfNode | cond: "; cond->traverseAndPrint();
-        std::cout << "ifBody: ";
+        nn++;
+        int cur = nn;
+        std::cout << cur << ";" << std::endl;
+        std::cout << cur << "[label=\"If\"];" << std::endl;
+        std::cout << cur << "--"; cond->traverseAndPrint();
+
         if (ifBody) {
-            ifBody->traverseAndPrint();
-        } else {
-            std::cout << "ifBody is null\n";
+            std::cout << cur << "--"; ifBody->traverseAndPrint();
         }
-        std::cout << "elseBody: ";
+
         if (elseBody) {
-            elseBody->traverseAndPrint();
-        } else {
-            std::cout << "elseBody is null\n";
+            std::cout << cur << "--"; elseBody->traverseAndPrint();
         }
-        std::cout << std::endl;
     }
 };
 
@@ -124,9 +181,12 @@ public:
     }
 
     virtual void traverseAndPrint() {
-        std::cout << "AssignNode | lhs: "; lhs->traverseAndPrint();
-        std::cout << " rhs: "; rhs->traverseAndPrint();
-        std::cout << std::endl;
+        nn++;
+        int cur = nn;
+        std::cout << cur << ";" << std::endl;
+        std::cout << cur << "[label=\"Assign\"];" << std::endl;
+        std::cout << cur << "--"; lhs->traverseAndPrint();
+        std::cout << cur << "--"; rhs->traverseAndPrint();
     }
 };
 
@@ -135,8 +195,11 @@ public:
     ASTNode* toReturn;
 
     virtual void traverseAndPrint() {
-        std::cout << "RetNode | toReturn: "; toReturn->traverseAndPrint();
-        std::cout << std::endl;
+        nn++;
+        int cur = nn;
+        std::cout << cur << ";" << std::endl;
+        std::cout << cur << "[label=\"Ret\"];" << std::endl;
+        std::cout << cur << "--"; toReturn->traverseAndPrint();
     }
 };
 
@@ -150,38 +213,37 @@ public:
     }
 
     virtual void traverseAndPrint() {
-        std::cout << "DeclNode | lhs: "; lhs->traverseAndPrint();
-        std::cout << " rhs: "; rhs->traverseAndPrint();
-        std::cout << std::endl;
+        nn++;
+        int cur = nn;
+        std::cout << cur << ";" << std::endl;
+        std::cout << cur << "[label=\"Decl\"];" << std::endl;
+        std::cout << cur << "--"; lhs->traverseAndPrint();
+        std::cout << cur << "--"; rhs->traverseAndPrint();
     }
 };
 
 class FuncDeclNode : public ASTNode {
 public:
-    // pair<type, name>
-    std::vector<std::pair<VarNode*, VarNode*>> args;
-    VarNode* returnType;
+    std::string name;
+    std::vector<VarNode*> args;
+    TypeNode* returnType;
     SequenceNode* body;
 
     virtual void traverseAndPrint() {
-        std::cout << "FuncDeclNode | args: ";
+        nn++;
+        int cur = nn;
+        std::cout << cur << ";" << std::endl;
+        std::cout << cur << "[label=\"FuncDecl\\nname=" << name << "\"];" << std::endl;
+
+
         if (args.size() > 0) {
             for (auto a : args) {
-                std::cout << "arg type :";
-                a.first->traverseAndPrint();
-                std::cout << " arg name: ";
-                a.second->traverseAndPrint();
+                std::cout << cur << "--"; a->traverseAndPrint();
             }
         }
 
-        std::cout << " returnType: ";
-        returnType->traverseAndPrint();
-
-
-        std::cout << " body: ";
-        body->traverseAndPrint();
-
-        std::cout << std::endl;
+        std::cout << cur << "--"; returnType->traverseAndPrint();
+        std::cout << cur << "--"; body->traverseAndPrint();
     }
 };
 
