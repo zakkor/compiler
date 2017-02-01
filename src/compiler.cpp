@@ -18,6 +18,7 @@ int main(int argc, char* argv[]) {
 
         Parser par;
         par.parse(lex.tokens);
-        std::cout << "Successfully built AST with " << par.root->seq.size() << " top-level nodes.";
+        std::cout << "Successfully built AST with " << par.root->seq.size() << " top-level nodes.\n";
+        par.print();
     }
 }

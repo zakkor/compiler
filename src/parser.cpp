@@ -190,7 +190,9 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
     // @TODO: restrict context(functionBody)
     else if (type == "KEYRET") {
         consume(t, "KEYRET");
-        return parseExpr(t, "TERM");
+        auto retNode = new RetNode();
+        retNode->toReturn = parseExpr(t, "TERM");
+        return retNode;
     }
 }
 
@@ -204,6 +206,5 @@ void Parser::parse(std::vector<Token> tokens) {
 }
 
 void Parser::print() {
-    ASTNode* node = nullptr;
-
+    root->traverseAndPrint();
 }

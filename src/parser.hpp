@@ -32,6 +32,10 @@ public:
     std::string name;
     int val;
 
+    virtual void traverseAndPrint() {
+        std::cout << "VarNode | name: " << name << " val: " << val << std::endl;
+    }
+
     virtual int get() {
         return val;
     }
@@ -40,6 +44,12 @@ public:
 class BinaryOP : public ASTNode {
 public:
     ASTNode *lhs, *rhs;
+
+    virtual void traverseAndPrint() {
+        std::cout << "BinaryOP | lhs: "; lhs->traverseAndPrint();
+        std::cout << " rhs: "; rhs->traverseAndPrint();
+        std::cout << std::endl;
+    }
 };
 
 class OPAddNode : public BinaryOP {
@@ -66,6 +76,12 @@ public:
             stmt->execute();
         }
     }
+
+    virtual void traverseAndPrint() {
+        for (auto node : seq) {
+            node->traverseAndPrint();
+        }
+    }
 };
 
 class IfNode : public ASTNode {
@@ -80,6 +96,22 @@ public:
             elseBody->execute();
         }
     }
+    virtual void traverseAndPrint() {
+        std::cout << "IfNode | cond: "; cond->traverseAndPrint();
+        std::cout << "ifBody: ";
+        if (ifBody) {
+            ifBody->traverseAndPrint();
+        } else {
+            std::cout << "ifBody is null\n";
+        }
+        std::cout << "elseBody: ";
+        if (elseBody) {
+            elseBody->traverseAndPrint();
+        } else {
+            std::cout << "elseBody is null\n";
+        }
+        std::cout << std::endl;
+    }
 };
 
 class AssignNode : public ASTNode {
@@ -89,6 +121,22 @@ public:
     virtual int get() {
         lhs->val = rhs->get();
         return lhs->val;
+    }
+
+    virtual void traverseAndPrint() {
+        std::cout << "AssignNode | lhs: "; lhs->traverseAndPrint();
+        std::cout << " rhs: "; rhs->traverseAndPrint();
+        std::cout << std::endl;
+    }
+};
+
+class RetNode : public ASTNode {
+public:
+    ASTNode* toReturn;
+
+    virtual void traverseAndPrint() {
+        std::cout << "RetNode | toReturn: "; toReturn->traverseAndPrint();
+        std::cout << std::endl;
     }
 };
 
@@ -100,6 +148,12 @@ public:
         lhs->val = rhs->get();
         return lhs->val;
     }
+
+    virtual void traverseAndPrint() {
+        std::cout << "DeclNode | lhs: "; lhs->traverseAndPrint();
+        std::cout << " rhs: "; rhs->traverseAndPrint();
+        std::cout << std::endl;
+    }
 };
 
 class FuncDeclNode : public ASTNode {
@@ -108,6 +162,27 @@ public:
     std::vector<std::pair<VarNode*, VarNode*>> args;
     VarNode* returnType;
     SequenceNode* body;
+
+    virtual void traverseAndPrint() {
+        std::cout << "FuncDeclNode | args: ";
+        if (args.size() > 0) {
+            for (auto a : args) {
+                std::cout << "arg type :";
+                a.first->traverseAndPrint();
+                std::cout << " arg name: ";
+                a.second->traverseAndPrint();
+            }
+        }
+
+        std::cout << " returnType: ";
+        returnType->traverseAndPrint();
+
+
+        std::cout << " body: ";
+        body->traverseAndPrint();
+
+        std::cout << std::endl;
+    }
 };
 
 class Parser {
