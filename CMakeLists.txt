@@ -9,6 +9,7 @@ set(SOURCE_FILES
   src/lexer.cpp
   src/token.cpp
   src/test.cpp
+  src/analyzer.cpp
   )
 
 add_executable(Compiler ${SOURCE_FILES})

@@ -4,20 +4,26 @@
 #include <exception>
 #include <stdexcept>
 #include <vector>
+#include <iostream>
 
 #include "token.hpp"
 #include "error.hpp"
+#include "analyzer.hpp"
 
 static unsigned int nn = 0;
+//using SymbolTable = std::map<std::string, SymbolInfo>;
 
 enum class NodeType {
     Var,
     OPAdd,
+    Assign,
 };
+
+bool wasDeclared(std::vector<SymbolTable>& tables, const std::string& name);
+std::string findTypeOf(std::vector<SymbolTable>& tables, const std::string& name);
 
 class ASTNode {
 public:
-    NodeType type;
     virtual void execute() {
         throw ASTException("No execute method");
     };
@@ -27,12 +33,22 @@ public:
     virtual void traverseAndPrint() {
         throw ASTException("No traverse method");
     }
+    virtual void check(std::vector<SymbolTable>& tables) {
+        throw ASTException("No check method");
+    }
+    virtual std::string getType() {
+        throw ASTException("No type method");
+    }
 };
 
 class TypeNode : public ASTNode {
 public:
-    TypeNode() : name("?") {}
+    TypeNode() {}
     std::string name;
+
+    virtual void check(std::vector<SymbolTable>& tables) {
+
+    }
 
     virtual void traverseAndPrint() {
         nn++;
@@ -46,18 +62,42 @@ class VarNode : public ASTNode {
 public:
     std::string name;
     int val;
-    TypeNode* type;
+//    TypeNode* type;
 
     virtual void traverseAndPrint() {
         nn++;
         int cur = nn;
         std::cout << cur << ";\n";
         std::cout << cur << "[label=\"Var\\nname=" << name << ", val=" << val << "\"];" << std::endl;
-        std::cout << cur << "--"; type->traverseAndPrint();
+//        std::cout << cur << "--"; type->traverseAndPrint();
+    }
+
+    virtual void check(std::vector<SymbolTable>& tables) {
+        if (!wasDeclared(tables, name)) {
+            std::cout << "error: '" << name << "' was not declared in this scope\n";
+        } else {
+            /// findTypeOf(tables, name); ///
+            // @Typechecking
+//            type->name = 
+//            type->check(tables);
+        }
     }
 
     virtual int get() {
         return val;
+    }
+};
+
+class ArgNode : public VarNode {
+public:
+    TypeNode* type;
+
+    virtual void traverseAndPrint() {
+        nn++;
+        int cur = nn;
+        std::cout << cur << ";\n";
+        std::cout << cur << "[label=\"Arg\\nname=" << name << ", val=" << val << "\"];" << std::endl;
+        std::cout << cur << "--"; type->traverseAndPrint();
     }
 };
 
@@ -72,6 +112,14 @@ public:
         std::cout << cur << "[label=\"Number literal\\nval=" << val << "\"];" << std::endl;
     }
 
+    virtual void check(std::vector<SymbolTable>& tables) {
+
+    }
+
+    virtual std::string getType() {
+        return "int";
+    }
+
     virtual int get() {
         return val;
     }
@@ -81,10 +129,9 @@ class BinaryOP : public ASTNode {
 public:
     ASTNode *lhs, *rhs;
 
-    virtual void traverseAndPrint() {
-        std::cout << "BinaryOP | lhs: "; lhs->traverseAndPrint();
-        std::cout << " rhs: "; rhs->traverseAndPrint();
-        std::cout << std::endl;
+    virtual void check(std::vector<SymbolTable>& tables) {
+        lhs->check(tables);
+        rhs->check(tables);
     }
 };
 
@@ -123,12 +170,21 @@ public:
 class SequenceNode : public ASTNode {
 public:
     std::vector<ASTNode*> seq;
+    SymbolTable st;
 
     // contains a sequence of execute()-able nodes (statements)
     virtual void execute() {
         for (auto stmt : seq) {
             stmt->execute();
         }
+    }
+
+    virtual void check(std::vector<SymbolTable>& tables) {
+        tables.push_back(st);
+        for (auto stmt : seq) {
+            stmt->check(tables);
+        }
+        tables.pop_back();
     }
 
     virtual void traverseAndPrint() {
@@ -154,6 +210,13 @@ public:
             elseBody->execute();
         }
     }
+
+    virtual void check(std::vector<SymbolTable>& tables) {
+        cond->check(tables);
+        ifBody->check(tables);
+        elseBody->check(tables);
+    }
+
     virtual void traverseAndPrint() {
         nn++;
         int cur = nn;
@@ -180,6 +243,15 @@ public:
         return lhs->val;
     }
 
+    virtual std::string getAssigneeName() {
+        return lhs->name;
+    }
+
+    virtual void check(std::vector<SymbolTable>& tables) {
+        lhs->check(tables);
+        rhs->check(tables);
+    }
+
     virtual void traverseAndPrint() {
         nn++;
         int cur = nn;
@@ -193,6 +265,10 @@ public:
 class RetNode : public ASTNode {
 public:
     ASTNode* toReturn;
+
+    virtual void check(std::vector<SymbolTable>& tables) {
+        toReturn->check(tables);
+    }
 
     virtual void traverseAndPrint() {
         nn++;
@@ -212,6 +288,24 @@ public:
         return lhs->val;
     }
 
+    virtual void check(std::vector<SymbolTable>& tables) {
+        if (wasDeclared(tables, lhs->name)) {
+            std::cout << "error: multiple definition of '" << lhs->name << "'\n";
+        } else {
+            auto varScope = std::string();
+            if (tables.size() == 1) {
+                varScope = "global";
+            } else {
+                varScope = "local";
+            }
+
+//            lhs->type->name = rhs->getType();
+            tables.back().emplace(std::make_pair(lhs->name, SymbolInfo("var", rhs->getType(), varScope)));
+            std::cout << "new var added to table: named " << lhs->name << ", type: "
+                      << rhs->getType() << ", scope: " << varScope << "\n";
+        }
+    }
+
     virtual void traverseAndPrint() {
         nn++;
         int cur = nn;
@@ -225,9 +319,44 @@ public:
 class FuncDeclNode : public ASTNode {
 public:
     std::string name;
-    std::vector<VarNode*> args;
+    std::vector<ArgNode*> args;
     TypeNode* returnType;
     SequenceNode* body;
+
+    virtual void check(std::vector<SymbolTable>& tables) {
+        if (wasDeclared(tables, name)) {
+            std::cout << "error: multiple definition of '" << name << "'\n";
+        } else {
+            auto funcScope = std::string();
+            if (tables.size() == 1) {
+                funcScope = "global";
+            } else {
+                funcScope = "local"; // this is an error
+                std::cout << "error: function '" << name << "' can only be declared in the global scope\n";
+            }
+            tables.back().emplace(std::make_pair(name, SymbolInfo("func", returnType->name, funcScope)));
+            std::cout << "new func added to table: named " << name << ", ret type: "
+                      << returnType->name << ", scope: " << funcScope << "\n";
+        }
+
+        // make a new scope for the args
+        tables.push_back(SymbolTable());
+
+        for (auto a : args) {
+            if (wasDeclared(tables, a->name)) {
+                std::cout << "error: multiple definition of '" << a->name << "'\n";
+            } else {
+                tables.back().emplace(std::make_pair(a->name, SymbolInfo("var", a->type->name, "local")));
+                std::cout << "new var (arg) added to table: named " << a->name << ", type: "
+                          << a->type->name << ", scope: " << "local" << "\n";
+            }
+        }
+
+        returnType->check(tables);
+
+        body->check(tables);
+        tables.pop_back();
+    }
 
     virtual void traverseAndPrint() {
         nn++;

@@ -1,0 +1,13 @@
+seq: - check children
+
+decl: - lhs not defined
+	- rhs IS defined
+
+FuncDecl: - arg types exist
+	- ret type exist
+
+assign: - lhs exists
+	- rhs exists
+
+add: - lhs exists
+	- rhs exists

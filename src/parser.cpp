@@ -3,6 +3,28 @@
 
 #include "parser.hpp"
 
+bool wasDeclared(std::vector<SymbolTable>& tables, const std::string& name) {
+    for (auto const& t : tables) {
+        if (t.find(name) != t.end()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+std::string findTypeOf(std::vector<SymbolTable>& tables, const std::string& name) {
+    for (auto const& t : tables) {
+        auto iter = t.find(name);
+        if (iter != t.end()) {
+            std::cout << "searched for " << name << " and found it as " << (*iter).second.type << " \n";
+            return (*iter).second.type;
+        }
+    }
+    std::cout << "searched for " << name << " but not found\n";
+
+    return "invalid";
+}
+
 /// Parses an `expr` as defined in 'syntax.rules', returning an ASTNode*
 ASTNode* Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& terminator) {
     std::stack<ASTNode*> nodeStack;
@@ -20,7 +42,7 @@ ASTNode* Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& t
 
         } else if (type == "IDENT") {
             auto newVar = new VarNode();
-            newVar->type = new TypeNode();
+//            newVar->type = new TypeNode();
             newVar->name = t->name();
             newVar->val = 0;
             nodeStack.push(newVar);
@@ -79,7 +101,7 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
         if (type == "ASSIGN") {
             auto assign = new AssignNode();
             auto var = new VarNode();
-            var->type = new TypeNode();
+//            var->type = new TypeNode();
             var->name = identName;
             assign->lhs = var;
             consume(t, "ASSIGN");
@@ -89,7 +111,7 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
         else if (type == "DECL") {
             auto decl = new DeclNode();
             auto var = new VarNode();
-            var->type = new TypeNode();
+//            var->type = new TypeNode();
             var->name = identName;
             decl->lhs = var;
             consume(t, "DECL");
@@ -128,10 +150,10 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
                     consume(t, "IDENT");
                     if (t->type() == "IDENT") {
                         // get arg name //
-                        auto argNameNode = new VarNode();
-                        argNameNode->name = t->name();
-                        argNameNode->type = argTypeNode;
-                        funcNode->args.push_back(argNameNode);
+                        auto argNode = new ArgNode();
+                        argNode->name = t->name();
+                        argNode->type = argTypeNode;
+                        funcNode->args.push_back(argNode);
 
                         consume(t, "IDENT");
                         // potentially consume a comma if it
