@@ -1,7 +1,6 @@
 #include "lexer.hpp"
 #include "parser.hpp"
 #include "test.hpp"
-#include "analyzer.hpp"
 
 int main(int argc, char* argv[]) {
     if (argc == 2 && std::string(argv[1]) == "test") {
@@ -22,10 +21,17 @@ int main(int argc, char* argv[]) {
         par.parse(lex.tokens);
         std::cout << "Successfully built AST with " << par.root->seq.size() << " top-level nodes.\n";
 //        par.print();
-        Analyzer an;
+
         std::vector<SymbolTable> tables;
-        std::cout << "--------------\n";
-        par.root->check(tables);
-        par.print();
+        std::cout << "--------- Starting semantic analysis ---------\n";
+        try {
+            par.root->check(tables);
+        }
+        catch (SemanticException& e) {
+            std::cout << e.what() << std::endl;
+            return -1;
+        }
+        std::cout << "--------- Finished semantic analysis ---------\n";
+//        par.print();
     }
 }

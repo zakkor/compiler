@@ -5,22 +5,31 @@
 #include <stdexcept>
 #include <vector>
 #include <iostream>
+#include <map>
 
 #include "token.hpp"
 #include "error.hpp"
-#include "analyzer.hpp"
 
-static unsigned int nn = 0;
-//using SymbolTable = std::map<std::string, SymbolInfo>;
+struct SymbolInfo {
+public:
+    SymbolInfo() = delete;
+    SymbolInfo(std::string kind,
+               std::string type,
+               std::string scope)
+        : kind(kind), type(type), scope(scope) {}
 
-enum class NodeType {
-    Var,
-    OPAdd,
-    Assign,
+    std::string kind; // func | var
+    std::string type;
+    std::string scope;
 };
+
+using SymbolTable = std::map<std::string, SymbolInfo>;
 
 bool wasDeclared(std::vector<SymbolTable>& tables, const std::string& name);
 std::string findTypeOf(std::vector<SymbolTable>& tables, const std::string& name);
+
+// @Refactor: remove this mess
+static unsigned int nn = 0;
 
 class ASTNode {
 public:
@@ -74,7 +83,7 @@ public:
 
     virtual void check(std::vector<SymbolTable>& tables) {
         if (!wasDeclared(tables, name)) {
-            std::cout << "error: '" << name << "' was not declared in this scope\n";
+            throw SemanticException("error: '" + name + "' was not declared in this scope");
         } else {
             /// findTypeOf(tables, name); ///
             // @Typechecking
@@ -180,11 +189,13 @@ public:
     }
 
     virtual void check(std::vector<SymbolTable>& tables) {
+
         tables.push_back(st);
         for (auto stmt : seq) {
             stmt->check(tables);
         }
         tables.pop_back();
+
     }
 
     virtual void traverseAndPrint() {
@@ -214,7 +225,9 @@ public:
     virtual void check(std::vector<SymbolTable>& tables) {
         cond->check(tables);
         ifBody->check(tables);
-        elseBody->check(tables);
+        if (elseBody) {
+            elseBody->check(tables);
+        }
     }
 
     virtual void traverseAndPrint() {
@@ -290,7 +303,7 @@ public:
 
     virtual void check(std::vector<SymbolTable>& tables) {
         if (wasDeclared(tables, lhs->name)) {
-            std::cout << "error: multiple definition of '" << lhs->name << "'\n";
+            throw SemanticException("error: multiple definition of '" + lhs->name + "'");
         } else {
             auto varScope = std::string();
             if (tables.size() == 1) {
@@ -299,7 +312,6 @@ public:
                 varScope = "local";
             }
 
-//            lhs->type->name = rhs->getType();
             tables.back().emplace(std::make_pair(lhs->name, SymbolInfo("var", rhs->getType(), varScope)));
             std::cout << "new var added to table: named " << lhs->name << ", type: "
                       << rhs->getType() << ", scope: " << varScope << "\n";
@@ -325,14 +337,15 @@ public:
 
     virtual void check(std::vector<SymbolTable>& tables) {
         if (wasDeclared(tables, name)) {
-            std::cout << "error: multiple definition of '" << name << "'\n";
+            throw SemanticException("error: multiple definition of function '" + name + "'");
         } else {
             auto funcScope = std::string();
             if (tables.size() == 1) {
                 funcScope = "global";
             } else {
                 funcScope = "local"; // this is an error
-                std::cout << "error: function '" << name << "' can only be declared in the global scope\n";
+                // @Improve: Need to handle methods
+                throw SemanticException("error: function '" + name + "' can only be declared in the global scope");
             }
             tables.back().emplace(std::make_pair(name, SymbolInfo("func", returnType->name, funcScope)));
             std::cout << "new func added to table: named " << name << ", ret type: "
@@ -340,11 +353,12 @@ public:
         }
 
         // make a new scope for the args
+
         tables.push_back(SymbolTable());
 
         for (auto a : args) {
             if (wasDeclared(tables, a->name)) {
-                std::cout << "error: multiple definition of '" << a->name << "'\n";
+                throw SemanticException("error: multiple definition of '" + a->name + "'");
             } else {
                 tables.back().emplace(std::make_pair(a->name, SymbolInfo("var", a->type->name, "local")));
                 std::cout << "new var (arg) added to table: named " << a->name << ", type: "
@@ -356,6 +370,7 @@ public:
 
         body->check(tables);
         tables.pop_back();
+
     }
 
     virtual void traverseAndPrint() {

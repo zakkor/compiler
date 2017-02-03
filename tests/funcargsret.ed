@@ -1,8 +1,8 @@
 foo :: int a, int b, int c -> float {
-    x = 9;
+    a = 9;
     b = 5;
-    if x - b {
-       c := 4;
-       j = 2;
+    if a - b {
+       c = 4;
+       j := 2;
     }
 }

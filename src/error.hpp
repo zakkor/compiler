@@ -15,3 +15,10 @@ public:
         std::runtime_error(msg)
         {}
 };
+
+class SemanticException : public std::runtime_error {
+public:
+    SemanticException(std::string const& msg) :
+        std::runtime_error(msg)
+        {}
+};

@@ -23,8 +23,14 @@ bool Tester::runAll() {
             lex.scan(filename);
             Parser par;
             par.parse(lex.tokens);
+
+            std::vector<SymbolTable> tables;
+            par.root->check(tables);
         } catch (SyntacticException& e) {
-            std::cout << "Test '" << filename << "' failed: " << e.what() << std::endl;
+            std::cout << "Parsing test '" << filename << "' failed: " << e.what() << std::endl;
+            return false;
+        } catch (SemanticException& e) {
+            std::cout << "Semantic test '" << filename << "' failed: " << e.what() << std::endl;
             return false;
         } catch (std::exception& e) {
             std::cout << "Tests failed: " << e.what() << std::endl;
