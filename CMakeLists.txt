@@ -12,6 +12,16 @@ set(SOURCE_FILES
   src/astnode.cpp
   src/typenode.cpp
   src/symbol.cpp
+  src/varnode.cpp
+  src/argnode.cpp
+  src/numlitnode.cpp
+  src/binaryops.cpp
+  src/declnode.cpp
+  src/seqnode.cpp
+  src/ifnode.cpp
+  src/assignnode.cpp
+  src/funcdeclnode.cpp
+  src/retnode.cpp
   )
 
 add_executable(Compiler ${SOURCE_FILES})

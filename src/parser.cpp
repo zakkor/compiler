@@ -3,28 +3,6 @@
 
 #include "parser.hpp"
 
-bool wasDeclared(std::vector<SymbolTable>& tables, const std::string& name) {
-    for (auto const& t : tables) {
-        if (t.find(name) != t.end()) {
-            return true;
-        }
-    }
-    return false;
-}
-
-std::string findTypeOf(std::vector<SymbolTable>& tables, const std::string& name) {
-    for (auto const& t : tables) {
-        auto iter = t.find(name);
-        if (iter != t.end()) {
-            std::cout << "searched for " << name << " and found it as " << (*iter).second.type << " \n";
-            return (*iter).second.type;
-        }
-    }
-    std::cout << "searched for " << name << " but not found\n";
-
-    return "invalid";
-}
-
 /// Parses an `expr` as defined in 'syntax.rules', returning an ASTNode*
 ASTNode* Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& terminator) {
     std::stack<ASTNode*> nodeStack;

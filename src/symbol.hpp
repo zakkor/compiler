@@ -2,6 +2,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 struct SymbolInfo {
 public:
@@ -16,3 +17,6 @@ public:
 };
 
 typedef std::map<std::string, SymbolInfo> SymbolTable;
+
+bool wasDeclared(std::vector<SymbolTable>& tables, const std::string& name);
+std::string findTypeOf(std::vector<SymbolTable>& tables, const std::string& name);
