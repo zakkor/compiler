@@ -32,6 +32,7 @@ int main(int argc, char* argv[]) {
             return -1;
         }
         std::cout << "--------- Finished semantic analysis ---------\n";
-//        par.print();
+        std::cout << "--------- Printing AST ---------\n";
+        par.print();
     }
 }
