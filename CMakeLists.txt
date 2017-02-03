@@ -10,6 +10,7 @@ set(SOURCE_FILES
   src/token.cpp
   src/test.cpp
   src/astnode.cpp
+  src/typenode.cpp
   src/symbol.cpp
   )
 

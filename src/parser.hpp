@@ -10,28 +10,10 @@
 #include "symbol.hpp"
 
 #include "astnode.hpp"
+#include "typenode.hpp"
 
 bool wasDeclared(std::vector<SymbolTable>& tables, const std::string& name);
 std::string findTypeOf(std::vector<SymbolTable>& tables, const std::string& name);
-
-// @Refactor: remove this mess
-//static unsigned int nn = 0;
-
-
-
-class TypeNode : public ASTNode {
-public:
-    std::string name;
-
-    virtual void check(std::vector<SymbolTable>& tables) {
-
-    }
-
-    virtual void print() {
-        std::cout << currentNode << ";\n";
-        std::cout << currentNode << "[label=\"Type\\nname=" << name << "\"];" << std::endl;
-    }
-};
 
 class VarNode : public ASTNode {
 public:
@@ -64,7 +46,6 @@ public:
     TypeNode* type;
 
     virtual void print() {
-        
         std::cout << currentNode << ";\n";
         std::cout << currentNode << "[label=\"Arg\\nname=" << name << ", val=" << val << "\"];" << std::endl;
         std::cout << currentNode << "--"; type->print();
@@ -76,7 +57,6 @@ public:
     int val;
 
     virtual void print() {
-        
         std::cout << currentNode << ";\n";
         std::cout << currentNode << "[label=\"Number literal\\nval=" << val << "\"];" << std::endl;
     }
@@ -111,7 +91,6 @@ public:
     }
 
     virtual void print() {
-        
         std::cout << currentNode << ";" << std::endl;
         std::cout << currentNode << "[label=\"Add\"];" << std::endl;
         std::cout << currentNode << "--"; lhs->print();
@@ -126,7 +105,6 @@ public:
     }
 
     virtual void print() {
-        
         std::cout << currentNode << ";" << std::endl;
         std::cout << currentNode << "[label=\"Subtract\"];" << std::endl;
         std::cout << currentNode << "--"; lhs->print();
@@ -157,7 +135,6 @@ public:
     }
 
     virtual void print() {
-        
         std::cout << currentNode << ";" << std::endl;
         std::cout << currentNode << "[label=\"Sequence\"];" << std::endl;
         for (auto node : seq) {
@@ -188,7 +165,6 @@ public:
     }
 
     virtual void print() {
-        
         std::cout << currentNode << ";" << std::endl;
         std::cout << currentNode << "[label=\"If\"];" << std::endl;
         std::cout << currentNode << "--"; cond->print();
@@ -222,7 +198,6 @@ public:
     }
 
     virtual void print() {
-        
         std::cout << currentNode << ";" << std::endl;
         std::cout << currentNode << "[label=\"Assign\"];" << std::endl;
         std::cout << currentNode << "--"; lhs->print();
@@ -239,7 +214,6 @@ public:
     }
 
     virtual void print() {
-        
         std::cout << currentNode << ";" << std::endl;
         std::cout << currentNode << "[label=\"Ret\"];" << std::endl;
         std::cout << currentNode << "--"; toReturn->print();
@@ -273,7 +247,6 @@ public:
     }
 
     virtual void print() {
-        
         std::cout << currentNode << ";" << std::endl;
         std::cout << currentNode << "[label=\"Decl\"];" << std::endl;
         std::cout << currentNode << "--"; lhs->print();
