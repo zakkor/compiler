@@ -15,7 +15,7 @@ public:
         std::vector<std::pair<std::string, std::string>> staticRules, paramRules;
         paramRules = {
             {R"(\b(?!.*if)(?!.*else)(?!.*return)[^\d\W]+\b)", "IDENT $0"},
-            {R"([0-9])", "NUMBER $0"},
+            {R"(\b[0-9]+)", "NUMBER $0"},
         };
 
         staticRules = {
@@ -24,6 +24,8 @@ public:
             {R"(\-)", "SUB"},
             {R"(\/)", "DIV"},
             {R"(\*)", "MUL"},
+            {R"(==)", "EQ"},
+            {R"(!=)", "NOTEQ"},
             {R"(\()", "OPAREN"},
             {R"(\))", "CPAREN"},
             {R"((:\=))", "DECL"},
@@ -36,6 +38,7 @@ public:
             {R"(::)", "HASTYPE"},
             {R"(,)", "COMMA"},
             {R"(else)", "KEYELSE"},
+            {R"(\!)", "NOT"},
         };
 
         // order matters

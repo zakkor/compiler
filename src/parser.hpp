@@ -21,6 +21,7 @@
 #include "assignnode.hpp"
 #include "funcdeclnode.hpp"
 #include "retnode.hpp"
+#include "unaryops.hpp"
 
 class Parser {
 public:
@@ -31,7 +32,7 @@ public:
     static inline void consume(std::vector<Token>::iterator& t, const std::string& requiredType) {
         auto type = t->type();
         if (type != requiredType) {
-            throw SyntacticException("Error: illegal token: have '" + type + "', need '"
+            throw SyntacticException("(Consume) Error: illegal token: have '" + type + "', need '"
                                      + requiredType + "'\n");
         }
 

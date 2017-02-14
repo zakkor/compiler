@@ -6,7 +6,8 @@
 /// Parses an `expr` as defined in 'syntax.rules', returning an ASTNode*
 ASTNode* Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& terminator) {
     std::stack<ASTNode*> nodeStack;
-    std::stack<BinaryOP*> opStack;
+    std::stack<BinaryOP*> binOpStack;
+    std::stack<UnaryOP*> unOpStack;
 
     for (std::string type = ""; true; ++t) {
         if (t->size() == 0) continue;
@@ -17,30 +18,42 @@ ASTNode* Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& t
             auto newVar = new NumberLiteralNode();
             newVar->val = t->param();
             nodeStack.push(newVar);
-
         } else if (type == "IDENT") {
             auto newVar = new VarNode();
-//            newVar->type = new TypeNode();
             newVar->name = t->name();
             newVar->val = 0;
             nodeStack.push(newVar);
         } else if (type == "ADD") {
             auto newOp = new OPAddNode();
-            opStack.push(newOp);
-
+            binOpStack.push(newOp);
         } else if (type == "SUB") {
             auto newOp = new OPSubNode();
-            opStack.push(newOp);
+            binOpStack.push(newOp);
+        } else if (type == "EQ") {
+            auto newOp = new OPEqNode();
+            binOpStack.push(newOp);
+        } else if (type == "NOT") {
+            auto newOp = new OPNotNode();
+            unOpStack.push(newOp);
         } else {
             consume(t, terminator);
             break;
         }
     }
 
+    while (!unOpStack.empty()) {
+        auto op = unOpStack.top();
+        unOpStack.pop();
+        auto operand = nodeStack.top();
+        nodeStack.pop();
+        op->operand = operand;
+        nodeStack.push(op);
+    }
+
     // merge nodes together
-    while (!opStack.empty()) {
-        auto op = opStack.top();
-        opStack.pop();
+    while (!binOpStack.empty()) {
+        auto op = binOpStack.top();
+        binOpStack.pop();
         auto lhs = nodeStack.top();
         nodeStack.pop();
         auto rhs = nodeStack.top();
@@ -79,7 +92,7 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
         if (type == "ASSIGN") {
             auto assign = new AssignNode();
             auto var = new VarNode();
-//            var->type = new TypeNode();
+
             var->name = identName;
             assign->lhs = var;
             consume(t, "ASSIGN");
@@ -89,7 +102,7 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
         else if (type == "DECL") {
             auto decl = new DeclNode();
             auto var = new VarNode();
-//            var->type = new TypeNode();
+
             var->name = identName;
             decl->lhs = var;
             consume(t, "DECL");

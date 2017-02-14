@@ -22,6 +22,7 @@ set(SOURCE_FILES
   src/assignnode.cpp
   src/funcdeclnode.cpp
   src/retnode.cpp
+  src/unaryops.cpp
   )
 
 add_executable(Compiler ${SOURCE_FILES})

@@ -19,3 +19,10 @@ void OPSubNode::print() {
     std::cout << currentNode << "--"; lhs->print();
     std::cout << currentNode << "--"; rhs->print();
 }
+
+void OPEqNode::print() {
+    std::cout << currentNode << ";" << std::endl;
+    std::cout << currentNode << "[label=\"Equality\"];" << std::endl;
+    std::cout << currentNode << "--"; lhs->print();
+    std::cout << currentNode << "--"; rhs->print();
+}

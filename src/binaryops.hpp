@@ -17,3 +17,8 @@ class OPSubNode : public BinaryOP {
 public:
     virtual void print();
 };
+
+class OPEqNode : public BinaryOP {
+public:
+    virtual void print();
+};

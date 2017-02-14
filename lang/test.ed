@@ -1,10 +1,6 @@
-foo :: int a -> int {
-	c := 5;
-	if a {
-		c = 3 + 4;
-  }
-	else {
-		c = 5 - 1;
-	}
-	return c;
+a := 5;
+if !a {
+    a = a + 1;
+} else {
+    a = a - 1;
 }

@@ -1,0 +1,5 @@
+first parse the AST for information about bindings (local variables vs functions)
+then traverse the AST and allocate register locations for each sub expression (not necessarily hardware registers, you want to make an abstract register allocation routine)
+then compile each sub expression into appropriate instructions
+finish the function assembly by putting initialization code at the preamble and then cleanup code at the end.
+output all of the compiled functions to a file
