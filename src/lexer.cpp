@@ -1,5 +1,40 @@
 #include "lexer.hpp"
 
+Lexer::Lexer(bool showInput) : showInput(showInput) {
+    std::vector<std::pair<std::string, std::string>> staticRules, paramRules;
+    paramRules = {
+        {R"(\b(?!.*if)(?!.*else)(?!.*return)(?!.*struct)[^\d\W]+\b)", "IDENT $0"},
+        {R"(\b[0-9]+)", "NUMBER $0"},
+    };
+
+    staticRules = {
+        {R"(\+)", "ADD"},
+        {R"(->)", "HASRET"},
+        {R"(\-)", "SUB"},
+        {R"(\/)", "DIV"},
+        {R"(\*)", "MUL"},
+        {R"(==)", "EQ"},
+        {R"(!=)", "NOTEQ"},
+        {R"(\()", "OPAREN"},
+        {R"(\))", "CPAREN"},
+        {R"((:\=))", "DECL"},
+        {R"(\=)", "ASSIGN"},
+        {R"(\;)", "TERM"},
+        {R"(if)", "KEYIF"},
+        {R"(return)", "KEYRET"},
+        {R"(\{)", "OBRACE"},
+        {R"(\})", "CBRACE"},
+        {R"(::)", "HASTYPE"},
+        {R"(,)", "COMMA"},
+        {R"(else)", "KEYELSE"},
+        {R"(\!)", "NOT"},
+    };
+
+    // order matters
+    rules.push_back(paramRules);
+    rules.push_back(staticRules);
+}
+
 void Lexer::print() {
     std::cout << "Lexer output:\n[\n";
     for (auto tok : tokens) {
