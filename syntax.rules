@@ -1,7 +1,10 @@
-number : 0|1|...|9
+number : 0|1|...|9...
 ident : [a-z|A-Z]
 expr : number/ident +/- ... ;
 
+# var declaration
+Type ident;
+ident Type;
 
 # assignment:
 ident = expr
@@ -11,18 +14,18 @@ ident := expr
 
 # if
 if expr {
-	expr 1
-	expr 2
+	stmt 1
+	stmt 2
 	...
-	expr n
+	stmt n
 }
 
 # else (requires previous if)
 else expr {
-	expr 1
-	expr 2
+	stmt 1
+	stmt 2
 	...
-	expr n
+	stmt n
 }
 
 // func definition
@@ -34,7 +37,7 @@ IDENT HASTYPE [IDENT IDENT, ...] OBRACE
 CBRACE
 
 // example
-ident :: int a {
+ident :: a int {
 	a + = 1;
 }
 
@@ -50,37 +53,6 @@ CBRACE
 
 // example:
 Foo :: struct {
-	int x;
-	int y;
-
-	addThem :: int -> int { // later on
- 		return x + y;
-	}
+	x int;
+	y int;
 }
-
-f := Foo{2, 3};
-f.addThem();
-
-Bar :: Foo { // way later on
-	newFunc :: {
-		print("kek");
-	}
-}
-
-// alias
-type :: anotherType;
-
-// alias and add stuff (inheritance?)
-type :: anotherType {
-	int y; 
-}
-// read as: has the type anotherType
-
-
-# more examples
-
-f := Foo{}; // implicit constructor
-add :: Foo f, i32 x, i32 y {}
-f.add(2, 3); // first arg can be used as receiver
-// or
-add(f, 2, 3); // exactly the same

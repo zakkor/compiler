@@ -1,4 +1,4 @@
-foo :: int a, int b, int c {
+foo :: a int, b int, c int {
     a = 9;
     b = 5;
     if a - b {

@@ -99,6 +99,21 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
             assign->rhs = parseExpr(t, "TERM");
             return assign;
         }
+        // TODO: Rename DeclNode to InferNode, add new DeclNode for
+        // variable declaration
+
+        // var declaration
+        // else if (type == "IDENT") {
+        //     auto decl = new DeclNode();
+        //     auto var = new VarNode();
+
+        //     var->name = identName;
+        //     decl->lhs = var;
+        //     consume(t, "DECL");
+        //     decl->rhs = parseExpr(t, "TERM");
+        //     return decl;
+        // }
+        // inferred var initialization
         else if (type == "DECL") {
             auto decl = new DeclNode();
             auto var = new VarNode();
@@ -133,16 +148,17 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
                 }
 
                 if (t->type() == "IDENT") {
-                    // get type name //
-                    auto argTypeNode = new TypeNode();
-                    argTypeNode->name = t->name();
+                    // get arg name //
+                    auto argNode = new ArgNode();
+                    argNode->name = t->name();
+
 
                     // advance
                     consume(t, "IDENT");
                     if (t->type() == "IDENT") {
-                        // get arg name //
-                        auto argNode = new ArgNode();
-                        argNode->name = t->name();
+                        // get type name //
+                        auto argTypeNode = new TypeNode();
+                        argTypeNode->name = t->name();
                         argNode->type = argTypeNode;
                         funcNode->args.push_back(argNode);
 

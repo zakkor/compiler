@@ -1,6 +1,6 @@
 foo :: {}
 bar :: -> int {}
-baz :: int a {}
-beb :: int a -> int {}
-bek :: int a, int b {}
-bez :: int a, int b -> int {}
+baz :: a int {}
+beb :: a int -> int {}
+bek :: a int, b int {}
+bez :: a int, b int -> int {}

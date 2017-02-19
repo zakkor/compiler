@@ -1,4 +1,4 @@
-foo :: int a, int b, int c -> float {
+foo :: a int, b int, c int -> float {
     a = 9;
     b = 5;
     if a - b {
