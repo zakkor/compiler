@@ -16,13 +16,15 @@ set(SOURCE_FILES
   src/argnode.cpp
   src/numlitnode.cpp
   src/binaryops.cpp
-  src/declnode.cpp
+  src/inferdeclnode.cpp
   src/seqnode.cpp
   src/ifnode.cpp
   src/assignnode.cpp
   src/funcdeclnode.cpp
   src/retnode.cpp
   src/unaryops.cpp
+  src/declnode.cpp
+  src/structdeclnode.cpp
   )
 
 add_executable(Compiler ${SOURCE_FILES})

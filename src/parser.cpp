@@ -87,7 +87,7 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
         consume(t, "IDENT");
 
         // identifier must be followed by
-        // assignment | declaration | hastype
+        // assignment | declaration | hastype | typeidentifier
         type = t->type();
         if (type == "ASSIGN") {
             auto assign = new AssignNode();
@@ -103,89 +103,129 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
         // variable declaration
 
         // var declaration
-        // else if (type == "IDENT") {
-        //     auto decl = new DeclNode();
-        //     auto var = new VarNode();
-
-        //     var->name = identName;
-        //     decl->lhs = var;
-        //     consume(t, "DECL");
-        //     decl->rhs = parseExpr(t, "TERM");
-        //     return decl;
-        // }
-        // inferred var initialization
-        else if (type == "DECL") {
+        else if (type == "IDENT") {
             auto decl = new DeclNode();
+            auto var = new VarNode();
+            auto type = new TypeNode();
+
+            var->name = identName;
+            type->name = t->name();
+
+            decl->var = var;
+            decl->type = type;
+
+            consume(t, "IDENT");
+            consume(t, "TERM");
+            return decl;
+        }
+        // inferred var initialization
+        else if (type == "INFERDECL") {
+            auto inferdecl = new InferDeclNode();
             auto var = new VarNode();
 
             var->name = identName;
-            decl->lhs = var;
-            consume(t, "DECL");
-            decl->rhs = parseExpr(t, "TERM");
-            return decl;
+            inferdecl->lhs = var;
+            consume(t, "INFERDECL");
+            inferdecl->rhs = parseExpr(t, "TERM");
+            return inferdecl;
         }
-        // is function
+        // func or struct
         else if (type == "HASTYPE") {
             consume(t, "HASTYPE");
 
-            auto funcNode = new FuncDeclNode();
-            funcNode->name = identName;
-            auto returnType = new TypeNode();
-            returnType->name = "void";
-            funcNode->returnType = returnType;
+            // struct
+            if (t->type() == "KEYSTRUCT") {
+                consume(t, "KEYSTRUCT");
+                auto structNode = new StructDeclNode();
+                structNode->name = identName;
 
-            // parse optional args + return type
-            while (t->type() != "OBRACE") {
-                if (t->type() == "HASRET") {
-                    consume(t, "HASRET");
+                consume(t, "OBRACE");
 
-                    // get type name //
-                    returnType->name = t->name();
-                    funcNode->returnType = returnType;
-
-                    consume(t, "IDENT");
-                    break;
-                }
-
-                if (t->type() == "IDENT") {
-                    // get arg name //
-                    auto argNode = new ArgNode();
-                    argNode->name = t->name();
-
-
-                    // advance
-                    consume(t, "IDENT");
+                while (t->type() != "CBRACE") {
                     if (t->type() == "IDENT") {
-                        // get type name //
-                        auto argTypeNode = new TypeNode();
-                        argTypeNode->name = t->name();
-                        argNode->type = argTypeNode;
-                        funcNode->args.push_back(argNode);
+                        // get arg name //
+                        auto argNode = new ArgNode();
+                        argNode->name = t->name();
 
+                        // advance
                         consume(t, "IDENT");
-                        // potentially consume a comma if it
-                        // is followed by an identifier
-                        auto maybeIdent = std::next(t, 1);
-                        if (t->type() == "COMMA"
-                            && maybeIdent->type() == "IDENT") {
-                            consume(t, "COMMA");
+                        if (t->type() == "IDENT") {
+                            // get type name //
+                            auto argTypeNode = new TypeNode();
+                            argTypeNode->name = t->name();
+                            argNode->type = argTypeNode;
+                            structNode->fields.push_back(argNode);
+
+                            consume(t, "IDENT");
+                            consume(t, "TERM");
                         }
                     }
                 }
+
+                consume(t, "CBRACE");
+                return structNode;
             }
+            // function
+            else {
+                auto funcNode = new FuncDeclNode();
+                funcNode->name = identName;
+                auto returnType = new TypeNode();
+                returnType->name = "void";
+                funcNode->returnType = returnType;
 
-            consume(t, "OBRACE");
+                // parse optional args + return type
+                while (t->type() != "OBRACE") {
+                    if (t->type() == "HASRET") {
+                        consume(t, "HASRET");
 
-            // parse body
-            auto body = new SequenceNode();
-            while (t->type() != "CBRACE") {
-                body->seq.push_back(parseStatement(t, "CBRACE"));
+                        // get type name //
+                        returnType->name = t->name();
+                        funcNode->returnType = returnType;
+
+                        consume(t, "IDENT");
+                        break;
+                    }
+
+                    if (t->type() == "IDENT") {
+                        // get arg name //
+                        auto argNode = new ArgNode();
+                        argNode->name = t->name();
+
+
+                        // advance
+                        consume(t, "IDENT");
+                        if (t->type() == "IDENT") {
+                            // get type name //
+                            auto argTypeNode = new TypeNode();
+                            argTypeNode->name = t->name();
+                            argNode->type = argTypeNode;
+                            funcNode->args.push_back(argNode);
+
+                            consume(t, "IDENT");
+                            // potentially consume a comma if it
+                            // is followed by an identifier
+                            auto maybeIdent = std::next(t, 1);
+                            if (t->type() == "COMMA"
+                                && maybeIdent->type() == "IDENT") {
+                                consume(t, "COMMA");
+                            }
+                        }
+                    }
+                }
+
+                consume(t, "OBRACE");
+
+                // parse body
+                auto body = new SequenceNode();
+                while (t->type() != "CBRACE") {
+                    body->seq.push_back(parseStatement(t, "CBRACE"));
+                }
+                funcNode->body = body;
+
+                consume(t, "CBRACE");
+
+                return funcNode;
             }
-            funcNode->body = body;
-
-            consume(t, "CBRACE");
-
-            return funcNode;
         }
     }
     else if (type == "KEYIF") {

@@ -1,4 +1,9 @@
-Vector ::
+empty ::
+struct {
+       
+}
+
+foo ::
 struct {
        x int;
        y int;

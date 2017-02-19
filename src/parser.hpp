@@ -15,6 +15,7 @@
 #include "argnode.hpp"
 #include "numlitnode.hpp"
 #include "binaryops.hpp"
+#include "inferdeclnode.hpp"
 #include "declnode.hpp"
 #include "seqnode.hpp"
 #include "ifnode.hpp"
@@ -22,6 +23,7 @@
 #include "funcdeclnode.hpp"
 #include "retnode.hpp"
 #include "unaryops.hpp"
+#include "structdeclnode.hpp"
 
 class Parser {
 public:

@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
                        "funcargsret.ed", "funcargsvoid.ed",
                        "funcvoidvoid.ed", "if.ed",
                        "ifelse.ed", "nestedif.ed",
-                       "functions.ed");
+                       "functions.ed", "struct.ed");
         tester.runAll();
     }
     else {
