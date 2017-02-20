@@ -2,8 +2,9 @@
 
 Lexer::Lexer(bool showInput) : showInput(showInput) {
     std::vector<std::pair<std::string, std::string>> staticRules, paramRules;
+    
     paramRules = {
-        {R"(\b(?!.*if)(?!.*else)(?!.*return)(?!.*struct)[^\d\W]+\b)", "IDENT $0"},
+        {R"(\b(?!.?if)(?!.?else)(?!.?return)(?!.?struct)[^\d\W]+\b)", "IDENT $0"},
         {R"(\b[0-9]+)", "NUMBER $0"},
     };
 
@@ -53,7 +54,6 @@ void Lexer::scan(const std::string& filename) {
 
     std::string line;
     while (std::getline(file, line)) {
-
         if (showInput) {
             std::cout << line << "\n";
         }

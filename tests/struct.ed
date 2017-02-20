@@ -1,10 +1,8 @@
-empty ::
-struct {
+empty :: struct {
        
 }
 
-foo ::
-struct {
+foo :: struct {
        x int;
        y int;
 }

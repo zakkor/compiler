@@ -4,3 +4,5 @@ if a + b {
 } else {
 	b = a + 1;
 }
+
+if a + b - c { a = a - 1; } else { b = a + 1; }
