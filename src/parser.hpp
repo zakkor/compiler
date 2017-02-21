@@ -28,8 +28,12 @@
 class Parser {
 public:
     void parse(std::vector<Token> tokens);
-    ASTNode* parseExpr(std::vector<Token>::iterator& t, const std::string& terminator);
-    ASTNode* parseStatement(std::vector<Token>::iterator& t, const std::string& terminator);
+
+    std::unique_ptr<ASTNode>
+    parseExpr(std::vector<Token>::iterator& t, const std::string& terminator);
+
+    std::unique_ptr<ASTNode>
+    parseStatement(std::vector<Token>::iterator& t, const std::string& terminator);
 
     static inline void consume(std::vector<Token>::iterator& t, const std::string& requiredType) {
         auto type = t->type();
@@ -48,7 +52,7 @@ public:
     }
 
     void print();
-    SequenceNode *root;
+    std::unique_ptr<SequenceNode> root;
 
     std::vector<Token> tokens;
 };

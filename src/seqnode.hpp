@@ -3,7 +3,7 @@
 
 class SequenceNode : public ASTNode {
 public:
-    std::vector<ASTNode*> seq;
+    std::vector<std::unique_ptr<ASTNode>> seq;
     SymbolTable st;
 
     virtual void check(std::vector<SymbolTable>& tables);

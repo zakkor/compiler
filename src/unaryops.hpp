@@ -1,10 +1,11 @@
 #pragma once
 
 #include "astnode.hpp"
+#include <memory>
 
 class UnaryOP : public ASTNode {
 public:
-    ASTNode *operand;
+    std::unique_ptr<ASTNode> operand;
 
     virtual void check(std::vector<SymbolTable>& tables);
 };

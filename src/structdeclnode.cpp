@@ -22,7 +22,7 @@ void StructDeclNode::check(std::vector<SymbolTable>& tables) {
     // make a new scope for the fields
     tables.push_back(SymbolTable());
 
-    for (auto f : fields) {
+    for (const auto& f : fields) {
         tables.back().emplace(std::make_pair(f->name, SymbolInfo("field", f->type->name, "local")));
         std::cout << "new field added to table: named " << f->name << ", type: "
                   << f->type->name << ", scope: " << "local" << "\n";
@@ -36,7 +36,7 @@ void StructDeclNode::print() {
     std::cout << currentNode << "[label=\"StructDecl\\nname=" << name << "\"];" << std::endl;
 
     if (fields.size() > 0) {
-        for (auto f : fields) {
+        for (const auto& f : fields) {
             std::cout << currentNode << "--"; f->print();
         }
     }

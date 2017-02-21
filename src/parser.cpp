@@ -1,13 +1,15 @@
 #include <stack>
 #include <iostream>
+#include <memory>
 
 #include "parser.hpp"
 
-/// Parses an `expr` as defined in 'syntax.rules', returning an ASTNode*
-ASTNode* Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& terminator) {
-    std::stack<ASTNode*> nodeStack;
-    std::stack<BinaryOP*> binOpStack;
-    std::stack<UnaryOP*> unOpStack;
+/// Parses an `expr` as defined in 'syntax.rules', returning an unique ptr to ASTNode
+std::unique_ptr<ASTNode>
+Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& terminator) {
+    std::stack<std::unique_ptr<ASTNode>> nodeStack;
+    std::stack<std::unique_ptr<BinaryOP>> binOpStack;
+    std::stack<std::unique_ptr<UnaryOP>> unOpStack;
 
     // TODO: handle order of operations (and parens)
 
@@ -16,10 +18,12 @@ ASTNode* Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& t
 
         type = t->type();
 
+        // plain ASTNodes
         if (type == "NUMBER") {
-            auto newVar = new NumberLiteralNode();
+            auto newVar = std::make_unique<NumberLiteralNode>();
             newVar->val = t->param();
-            nodeStack.push(newVar);
+
+            nodeStack.push(std::move(newVar));
         } else if (type == "IDENT") {
             // ++t;
             // // function call
@@ -30,24 +34,27 @@ ASTNode* Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& t
             // // just a variable
             // else {
             //     --t;
-                auto newVar = new VarNode();
-                newVar->name = t->name();
-                newVar->val = 0;
-                nodeStack.push(newVar);
+            auto newVar = std::make_unique<VarNode>();
+            newVar->name = t->name();
+            newVar->val = 0;
+
+            nodeStack.push(std::move(newVar));
 //            }
-        } else if (type == "ADD") {
-            auto newOp = new OPAddNode();
-            binOpStack.push(newOp);
+        }
+        // binary operators
+        else if (type == "ADD") {
+            binOpStack.push(std::make_unique<OPAddNode>());
         } else if (type == "SUB") {
-            auto newOp = new OPSubNode();
-            binOpStack.push(newOp);
+            binOpStack.push(std::make_unique<OPSubNode>());
         } else if (type == "EQ") {
-            auto newOp = new OPEqNode();
-            binOpStack.push(newOp);
-        } else if (type == "NOT") {
-            auto newOp = new OPNotNode();
-            unOpStack.push(newOp);
-        } else {
+            binOpStack.push(std::make_unique<OPEqNode>());
+        }
+        // unary operators
+        else if (type == "NOT") {
+            unOpStack.push(std::make_unique<OPNotNode>());
+        }
+        // end of expression
+        else {
             consume(t, terminator);
             break;
         }
@@ -55,36 +62,39 @@ ASTNode* Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& t
 
     // TODO: Make BinaryOP and UnaryOP children of an `Operator` class
     while (!unOpStack.empty()) {
-        auto op = unOpStack.top();
+        auto unaryOp = std::move(unOpStack.top());
         unOpStack.pop();
-        auto operand = nodeStack.top();
+
+        unaryOp->operand = std::move(nodeStack.top());
         nodeStack.pop();
-        op->operand = operand;
-        nodeStack.push(op);
+
+        nodeStack.push(std::move(unaryOp));
     }
 
     // merge nodes together
     while (!binOpStack.empty()) {
-        auto op = binOpStack.top();
+        auto binaryOp = std::move(binOpStack.top());
         binOpStack.pop();
-        auto lhs = nodeStack.top();
+
+        binaryOp->lhs = std::move(nodeStack.top());
         nodeStack.pop();
-        auto rhs = nodeStack.top();
+
+        binaryOp->rhs = std::move(nodeStack.top());
         nodeStack.pop();
-        op->lhs = lhs;
-        op->rhs = rhs;
-        nodeStack.push(op);
+
+        nodeStack.push(std::move(binaryOp));
     }
 
     // only one node left in nodeStack now
-    auto retNode = nodeStack.top();
+    auto retNode = std::move(nodeStack.top());
     nodeStack.pop();
 
     return retNode;
 }
 
-/// Parses an `stmt` as defined in 'syntax.rules', returning an ASTNode*
-ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::string& terminator) {
+/// Parses an `stmt` as defined in 'syntax.rules', returning an unique ptr to ASTNode
+std::unique_ptr<ASTNode>
+Parser::parseStatement(std::vector<Token>::iterator& t, const std::string& terminator) {
     auto type = t->type();
 
     // first token ( IDENT ) or ( KEYIF )
@@ -102,42 +112,41 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
         // assignment | declaration | hastype | typeidentifier
         type = t->type();
         if (type == "ASSIGN") {
-            auto assign = new AssignNode();
-            auto var = new VarNode();
+            auto assign = std::make_unique<AssignNode>();
+            assign->lhs = std::make_unique<VarNode>();
 
-            var->name = identName;
-            assign->lhs = var;
+            assign->lhs->name = identName;
+
             consume(t, "ASSIGN");
+
             assign->rhs = parseExpr(t, "TERM");
             return assign;
         }
 
         // var declaration
         else if (type == "IDENT") {
-            auto decl = new DeclNode();
-            auto var = new VarNode();
-            auto type = new TypeNode();
+            auto decl = std::make_unique<DeclNode>();
+            decl->var = std::make_unique<VarNode>();
+            decl->type = std::make_unique<TypeNode>();
 
-            var->name = identName;
-            type->name = t->name();
-
-            decl->var = var;
-            decl->type = type;
+            decl->var->name = identName;
+            decl->type->name = t->name();
 
             consume(t, "IDENT");
             consume(t, "TERM");
-            return decl;
+            return std::move(decl);
         }
         // inferred var initialization
         else if (type == "INFERDECL") {
-            auto inferdecl = new InferDeclNode();
-            auto var = new VarNode();
+            auto inferdecl = std::make_unique<InferDeclNode>();
+            inferdecl->lhs = std::make_unique<VarNode>();
 
-            var->name = identName;
-            inferdecl->lhs = var;
+            inferdecl->lhs->name = identName;
+
             consume(t, "INFERDECL");
+
             inferdecl->rhs = parseExpr(t, "TERM");
-            return inferdecl;
+            return std::move(inferdecl);
         }
         // func or struct
         else if (type == "HASTYPE") {
@@ -146,7 +155,7 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
             // struct
             if (t->type() == "KEYSTRUCT") {
                 consume(t, "KEYSTRUCT");
-                auto structNode = new StructDeclNode();
+                auto structNode = std::make_unique<StructDeclNode>();
                 structNode->name = identName;
 
                 consume(t, "OBRACE");
@@ -155,17 +164,17 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
                 while (t->type() != "CBRACE") {
                     if (t->type() == "IDENT") {
                         // get arg name //
-                        auto argNode = new ArgNode();
+                        auto argNode = std::make_unique<ArgNode>();
                         argNode->name = t->name();
 
                         // advance
                         consume(t, "IDENT");
                         if (t->type() == "IDENT") {
                             // get type name //
-                            auto argTypeNode = new TypeNode();
-                            argTypeNode->name = t->name();
-                            argNode->type = argTypeNode;
-                            structNode->fields.push_back(argNode);
+                            argNode->type = std::make_unique<TypeNode>();
+                            argNode->type->name = t->name();
+
+                            structNode->fields.push_back(std::move(argNode));
 
                             consume(t, "IDENT");
                             consume(t, "TERM");
@@ -177,15 +186,15 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
                 // refactor until here
 
                 consume(t, "CBRACE");
-                return structNode;
+                return std::move(structNode);
             }
             // function
             else {
-                auto funcNode = new FuncDeclNode();
+                auto funcNode = std::make_unique<FuncDeclNode>();
                 funcNode->name = identName;
-                auto returnType = new TypeNode();
-                returnType->name = "void";
-                funcNode->returnType = returnType;
+
+                funcNode->returnType = std::make_unique<TypeNode>();
+                funcNode->returnType->name = "void";
 
                 // TODO: Refactor this (?)
                 // parse optional args + return type
@@ -194,8 +203,7 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
                         consume(t, "HASRET");
 
                         // get type name //
-                        returnType->name = t->name();
-                        funcNode->returnType = returnType;
+                        funcNode->returnType->name = t->name();
 
                         consume(t, "IDENT");
                         break;
@@ -203,18 +211,16 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
 
                     if (t->type() == "IDENT") {
                         // get arg name //
-                        auto argNode = new ArgNode();
+                        auto argNode = std::make_unique<ArgNode>();
                         argNode->name = t->name();
-
 
                         // advance
                         consume(t, "IDENT");
                         if (t->type() == "IDENT") {
                             // get type name //
-                            auto argTypeNode = new TypeNode();
-                            argTypeNode->name = t->name();
-                            argNode->type = argTypeNode;
-                            funcNode->args.push_back(argNode);
+                            argNode->type = std::make_unique<TypeNode>();
+                            argNode->type->name = t->name();
+                            funcNode->args.push_back(std::move(argNode));
 
                             consume(t, "IDENT");
                             // potentially consume a comma if it
@@ -233,37 +239,35 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
                 consume(t, "OBRACE");
 
                 // parse body
-                auto body = new SequenceNode();
+                auto body = std::make_unique<SequenceNode>();
                 while (t->type() != "CBRACE") {
                     body->seq.push_back(parseStatement(t, "CBRACE"));
                 }
-                funcNode->body = body;
+                funcNode->body = std::move(body);
 
                 consume(t, "CBRACE");
 
-                return funcNode;
+                return std::move(funcNode);
             }
         }
     }
     else if (type == "KEYIF") {
-        auto ifNode = new IfNode();
         consume(t, "KEYIF");
+        auto ifNode = std::make_unique<IfNode>();
+        ifNode->cond = parseExpr(t, "OBRACE");
 
-        ASTNode* cond = parseExpr(t, "OBRACE");
-        ifNode->cond = cond;
-
-        auto ifBody = new SequenceNode();
+        auto ifBody = std::make_unique<SequenceNode>();
         while (t->type() != "CBRACE") {
             ifBody->seq.push_back(parseStatement(t, "CBRACE"));
         }
-        ifNode->ifBody = ifBody;
+        ifNode->ifBody = std::move(ifBody);
 
         consume(t, "CBRACE");
 
         // there can be no else after this because we have
         // reached the end of the token stream
         if (t == tokens.end()) {
-            return ifNode;
+            return std::move(ifNode);
         }
 
         // will be either an ELSE or the next statement
@@ -272,28 +276,28 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
             consume(t, "KEYELSE"); // consume KEYELSE
             consume(t, "OBRACE"); // consume OBRACKET
 
-            auto elseBody = new SequenceNode();
+            auto elseBody = std::make_unique<SequenceNode>();
             while (t->type() != "CBRACE") {
                 elseBody->seq.push_back(parseStatement(t, "CBRACE"));
             }
-            ifNode->elseBody = elseBody;
+            ifNode->elseBody = std::move(elseBody);
 
             consume(t, "CBRACE");
         }
-        return ifNode;
+        return std::move(ifNode);
     }
     // @TODO: restrict context(functionBody)
     else if (type == "KEYRET") {
         consume(t, "KEYRET");
-        auto retNode = new RetNode();
+        auto retNode = std::make_unique<RetNode>();
         retNode->toReturn = parseExpr(t, "TERM");
-        return retNode;
+        return std::move(retNode);
     }
 }
 
 void Parser::parse(std::vector<Token> tokens) {
     this->tokens = tokens;
-    root = new SequenceNode();
+    root = std::make_unique<SequenceNode>();
 
     for (auto t = this->tokens.begin(); t != this->tokens.end(); /* */) {
         root->seq.push_back(parseStatement(t, "TERM"));

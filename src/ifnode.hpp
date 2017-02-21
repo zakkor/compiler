@@ -3,8 +3,8 @@
 
 class IfNode : public ASTNode {
 public:
-    ASTNode *cond;
-    SequenceNode *ifBody, *elseBody;
+    std::unique_ptr<ASTNode> cond;
+    std::unique_ptr<SequenceNode> ifBody, elseBody;
 
     virtual void check(std::vector<SymbolTable>& tables);
     virtual void print();

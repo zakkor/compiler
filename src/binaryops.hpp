@@ -1,9 +1,10 @@
 #pragma once
 #include "astnode.hpp"
+#include <memory>
 
 class BinaryOP : public ASTNode {
 public:
-    ASTNode *lhs, *rhs;
+    std::unique_ptr<ASTNode> lhs, rhs;
 
     virtual void check(std::vector<SymbolTable>& tables);
 };

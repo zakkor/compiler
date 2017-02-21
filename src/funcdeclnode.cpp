@@ -24,7 +24,7 @@ void FuncDeclNode::check(std::vector<SymbolTable>& tables) {
 
     tables.push_back(SymbolTable());
 
-    for (auto a : args) {
+    for (const auto& a : args) {
         if (wasDeclared(tables, a->name)) {
             throw SemanticException("error: multiple definition of '" + a->name + "'");
         } else {
@@ -46,7 +46,7 @@ void FuncDeclNode::print() {
 
 
     if (args.size() > 0) {
-        for (auto a : args) {
+        for (const auto& a : args) {
             std::cout << currentNode << "--"; a->print();
         }
     }

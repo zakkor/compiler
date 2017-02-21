@@ -6,9 +6,9 @@
 class FuncDeclNode : public ASTNode {
 public:
     std::string name;
-    std::vector<ArgNode*> args;
-    TypeNode* returnType;
-    SequenceNode* body;
+    std::vector<std::unique_ptr<ArgNode>> args;
+    std::unique_ptr<TypeNode> returnType;
+    std::unique_ptr<SequenceNode> body;
 
     virtual void check(std::vector<SymbolTable>& tables);
     virtual void print();

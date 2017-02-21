@@ -3,7 +3,7 @@
 
 void SequenceNode::check(std::vector<SymbolTable>& tables) {
     tables.push_back(st);
-    for (auto stmt : seq) {
+    for (const auto& stmt : seq) {
         stmt->check(tables);
     }
     tables.pop_back();
@@ -16,7 +16,7 @@ void SequenceNode::print() {
     }
 
     std::cout << currentNode << "[label=\"Sequence\"];" << std::endl;
-    for (auto node : seq) {
+    for (const auto& node : seq) {
         std::cout << currentNode << "--"; node->print();
     }
 }

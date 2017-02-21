@@ -5,11 +5,13 @@
 int main(int argc, char* argv[]) {
     if (argc == 2 && std::string(argv[1]) == "test") {
         Tester tester;
-        tester.specify("assign.ed", "decl.ed",
+        tester.specify("assign.ed",
+                       "decl.ed",
                        "funcargsret.ed", "funcargsvoid.ed",
                        "funcvoidvoid.ed", "if.ed",
                        "ifelse.ed", "nestedif.ed",
-                       "functions.ed", "struct.ed", "inferdecl.ed");
+                       "functions.ed", "struct.ed", "inferdecl.ed"
+                       );
         tester.runAll();
     }
     else {
@@ -46,7 +48,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        //        std::cout << "--------- Printing AST ---------\n";
-        //        par.print();
+        std::cout << "-----------------------------------\n";
+        //par.print();
     }
 }
