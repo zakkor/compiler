@@ -12,7 +12,7 @@ void StructDeclNode::check(std::vector<SymbolTable>& tables) {
             structScope = "global";
         } else {
             structScope = "local"; // this is an error
-            // @Improve: Need to handle methods
+            // TODO: Need to handle methods
             throw SemanticException("error: struct '" + name + "' can only be declared in the global scope");
         }
         tables.back().emplace(std::make_pair(name, SymbolInfo("struct", "???", structScope)));

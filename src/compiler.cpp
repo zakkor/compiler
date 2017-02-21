@@ -13,26 +13,40 @@ int main(int argc, char* argv[]) {
         tester.runAll();
     }
     else {
-        Lexer lex(true);
+        Lexer lex(true); // true = print file input
         lex.scan("test.ed");
-        lex.print();
+        std::cout << "-----------------------------------\n";
+        //        lex.print();
 
         Parser par;
-        par.parse(lex.tokens);
-        std::cout << "Successfully built AST with " << par.root->seq.size() << " top-level nodes.\n";
-//        par.print();
+        try {
+            par.parse(lex.tokens);
+        }
+        catch (const SyntacticException& e) {
+            std::cout << e.what();
+            return -1;
+        }
 
         std::vector<SymbolTable> tables;
-        std::cout << "--------- Starting semantic analysis ---------\n";
         try {
             par.root->check(tables);
         }
-        catch (SemanticException& e) {
-            std::cout << e.what() << std::endl;
-            return -1;
+        catch (const SemanticException& e) {
+            std::cout << e.what();
+            return -2;
         }
-        std::cout << "--------- Finished semantic analysis ---------\n";
-        std::cout << "--------- Printing AST ---------\n";
-        par.print();
+
+        std::cout << "table size: " << tables.size() << std::endl;
+        for (auto t : tables) {
+            for (auto i : t) {
+                std::cout << "name: " << i.first << std::endl
+                          << "\tkind: " << i.second.kind << std::endl
+                          << "\ttype: " << i.second.type << std::endl
+                          << "\tscope: " << i.second.scope << std::endl;
+            }
+        }
+
+        //        std::cout << "--------- Printing AST ---------\n";
+        //        par.print();
     }
 }

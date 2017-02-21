@@ -11,7 +11,7 @@ public:
                std::string type,
                std::string scope);
 
-    std::string kind; // func | var
+    std::string kind; // func | var | struct | field | arg
     std::string type;
     std::string scope;
 };

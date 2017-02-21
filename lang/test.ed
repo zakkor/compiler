@@ -1,5 +1,10 @@
-Vector ::
-struct {
-       x int;
-       y int;
+foo :: a int -> int {
+	c int;
+	c = a + 15;
+
+	if a - 5 == 3 {
+		return a + 1;
+	} else {
+		return a - c;
+	}
 }

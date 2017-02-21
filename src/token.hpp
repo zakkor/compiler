@@ -10,6 +10,8 @@ public:
     std::string operator[](size_t idx) const;
     std::string type() const;
     std::string name() const;
+    std::string line() const;
+    std::string toknum() const;
     int param() const;
     std::string full() const;
 };

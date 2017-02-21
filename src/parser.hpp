@@ -33,9 +33,15 @@ public:
 
     static inline void consume(std::vector<Token>::iterator& t, const std::string& requiredType) {
         auto type = t->type();
+
+        auto errorMsg = "illegal token: have '" + type + "', need '"
+            + requiredType + "'";
+
         if (type != requiredType) {
-            throw SyntacticException("(Consume) Error: illegal token: have '" + type + "', need '"
-                                     + requiredType + "'\n");
+            if (requiredType == "TERM") {
+                errorMsg += "\nnote: you are probably missing a semicolon";
+            }
+            throw SyntacticException(t, errorMsg);
         }
 
         ++t; // eat token

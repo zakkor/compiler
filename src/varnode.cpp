@@ -12,7 +12,7 @@ void VarNode::check(std::vector<SymbolTable>& tables) {
         throw SemanticException("error: '" + name + "' was not declared in this scope");
     } else {
         /// findTypeOf(tables, name); ///
-        // @Typechecking
+        // TODO: Typechecking
 //            type->name = 
 //            type->check(tables);
     }

@@ -9,6 +9,8 @@ ASTNode* Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& t
     std::stack<BinaryOP*> binOpStack;
     std::stack<UnaryOP*> unOpStack;
 
+    // TODO: handle order of operations (and parens)
+
     for (std::string type = ""; true; ++t) {
         if (t->size() == 0) continue;
 
@@ -19,10 +21,20 @@ ASTNode* Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& t
             newVar->val = t->param();
             nodeStack.push(newVar);
         } else if (type == "IDENT") {
-            auto newVar = new VarNode();
-            newVar->name = t->name();
-            newVar->val = 0;
-            nodeStack.push(newVar);
+            // ++t;
+            // // function call
+            // if (t->type() == "OPAREN") {
+            //     std::cout << "ident with oparen after it \n";
+            // }
+
+            // // just a variable
+            // else {
+            //     --t;
+                auto newVar = new VarNode();
+                newVar->name = t->name();
+                newVar->val = 0;
+                nodeStack.push(newVar);
+//            }
         } else if (type == "ADD") {
             auto newOp = new OPAddNode();
             binOpStack.push(newOp);
@@ -41,6 +53,7 @@ ASTNode* Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& t
         }
     }
 
+    // TODO: Make BinaryOP and UnaryOP children of an `Operator` class
     while (!unOpStack.empty()) {
         auto op = unOpStack.top();
         unOpStack.pop();
@@ -76,10 +89,9 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
 
     // first token ( IDENT ) or ( KEYIF )
     if (type == "KEYELSE")
-        throw SyntacticException("Error: else without a previous if\n");
+        throw SyntacticException(t, "else without a previous if");
     if (type != "IDENT" && type != "KEYIF" && type != "KEYRET")
-        throw SyntacticException("Error: statement must begin with def, decl, return, or if (have " + type + ")\n");
-
+        throw SyntacticException(t, "statement must begin with def, decl, return, or if (have " + type + ")");
 
     if (type == "IDENT") {
         auto identName = t->name();
@@ -99,8 +111,6 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
             assign->rhs = parseExpr(t, "TERM");
             return assign;
         }
-        // TODO: Rename DeclNode to InferNode, add new DeclNode for
-        // variable declaration
 
         // var declaration
         else if (type == "IDENT") {
@@ -141,6 +151,7 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
 
                 consume(t, "OBRACE");
 
+                // TODO: !!!! Refactor this (need to handle function definitions as well (methods))
                 while (t->type() != "CBRACE") {
                     if (t->type() == "IDENT") {
                         // get arg name //
@@ -159,8 +170,11 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
                             consume(t, "IDENT");
                             consume(t, "TERM");
                         }
+                    } else {
+                        throw SyntacticException(t, "illegal token in struct definition (" + t->type() + ")");
                     }
                 }
+                // refactor until here
 
                 consume(t, "CBRACE");
                 return structNode;
@@ -173,6 +187,7 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
                 returnType->name = "void";
                 funcNode->returnType = returnType;
 
+                // TODO: Refactor this (?)
                 // parse optional args + return type
                 while (t->type() != "OBRACE") {
                     if (t->type() == "HASRET") {
@@ -210,6 +225,8 @@ ASTNode* Parser::parseStatement(std::vector<Token>::iterator& t, const std::stri
                                 consume(t, "COMMA");
                             }
                         }
+                    } else {
+                        throw SyntacticException(t, "illegal token in function signature (" + t->type() + ")");
                     }
                 }
 

@@ -12,7 +12,7 @@ void FuncDeclNode::check(std::vector<SymbolTable>& tables) {
             funcScope = "global";
         } else {
             funcScope = "local"; // this is an error
-            // @Improve: Need to handle methods
+            // TODO: Need to handle methods
             throw SemanticException("error: function '" + name + "' can only be declared in the global scope");
         }
         tables.back().emplace(std::make_pair(name, SymbolInfo("func", returnType->name, funcScope)));
@@ -29,14 +29,14 @@ void FuncDeclNode::check(std::vector<SymbolTable>& tables) {
             throw SemanticException("error: multiple definition of '" + a->name + "'");
         } else {
             tables.back().emplace(std::make_pair(a->name, SymbolInfo("var", a->type->name, "local")));
-            std::cout << "new var (arg) added to table: named " << a->name << ", type: "
+            std::cout << "\tnew var (arg) added to table: named " << a->name << ", type: "
                       << a->type->name << ", scope: " << "local" << "\n";
         }
     }
 
     returnType->check(tables);
-
     body->check(tables);
+
     tables.pop_back();
 }
 

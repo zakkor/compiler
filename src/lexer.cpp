@@ -1,8 +1,9 @@
 #include "lexer.hpp"
+#include <iomanip>
 
 Lexer::Lexer(bool showInput) : showInput(showInput) {
     std::vector<std::pair<std::string, std::string>> staticRules, paramRules;
-    
+
     paramRules = {
         {R"(\b(?!.?if)(?!.?else)(?!.?return)(?!.?struct)[^\d\W]+\b)", "IDENT $0"},
         {R"(\b[0-9]+)", "NUMBER $0"},
@@ -43,6 +44,7 @@ void Lexer::print() {
         std::cout << tok.full() << std::endl;
     }
     std::cout << "]\n";
+    std::cout << "-----------------------------------\n";
 }
 
 void Lexer::scan(const std::string& filename) {
@@ -52,10 +54,12 @@ void Lexer::scan(const std::string& filename) {
         std::cout << "Input is:\n";
     }
 
+    unsigned int lineNumber = 1, tokNumber = 1;
     std::string line;
     while (std::getline(file, line)) {
+        tokNumber = 1;
         if (showInput) {
-            std::cout << line << "\n";
+            std::cout << std::setfill('0') << std::setw(2) << lineNumber << " | " << line << "\n";
         }
 
         for (auto const& rule : rules) {
@@ -71,10 +75,13 @@ void Lexer::scan(const std::string& filename) {
         for (auto& stringToken : newStringGroup) {
             trim(stringToken);
             if (stringToken == " " || stringToken == "") continue;
-            newTokenGroup.push_back(Token(stringToken));
+            newTokenGroup.push_back(Token(std::to_string(lineNumber) + " " + std::to_string(tokNumber) + " " + stringToken));
+            tokNumber++;
         }
 
         // append to full vec
         tokens.insert(tokens.end(), newTokenGroup.begin(), newTokenGroup.end());
+
+        lineNumber++;
     }
 }

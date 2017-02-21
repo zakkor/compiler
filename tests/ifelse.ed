@@ -5,4 +5,6 @@ if a + b {
 	b = a + 1;
 }
 
+c string;
+
 if a + b - c { a = a - 1; } else { b = a + 1; }
