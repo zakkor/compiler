@@ -1,5 +1,8 @@
 #include "typenode.hpp"
 
+TypeNode::TypeNode(const std::string& name)
+    : name(name) {}
+
 void TypeNode::check(std::vector<SymbolTable>& tables) {
 
 }

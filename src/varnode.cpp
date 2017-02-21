@@ -2,6 +2,9 @@
 #include "symbol.hpp"
 #include "error.hpp"
 
+VarNode::VarNode(const std::string& name)
+    : name(name) {}
+
 void VarNode::print() {
     std::cout << currentNode << ";\n";
     std::cout << currentNode << "[label=\"Var\\nname=" << name << "\"];" << std::endl;

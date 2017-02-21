@@ -6,6 +6,10 @@
 
 class VarNode : public ASTNode {
 public:
+    VarNode(){
+        std::cout << "called empty varnode()\n";
+    };
+    VarNode(const std::string& name);
     std::string name;
 
     virtual void print();

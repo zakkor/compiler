@@ -5,6 +5,9 @@
 
 class DeclNode : public ASTNode {
 public:
+    DeclNode(std::unique_ptr<VarNode> var,
+             std::unique_ptr<TypeNode> type);
+
     std::unique_ptr<VarNode> var;
     std::unique_ptr<TypeNode> type;
 

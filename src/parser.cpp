@@ -34,10 +34,7 @@ Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& terminator
             // // just a variable
             // else {
             //     --t;
-            auto newVar = std::make_unique<VarNode>();
-            newVar->name = t->name();
-//            newVar->val = 0;
-
+            auto newVar = std::make_unique<VarNode>(t->name());
             nodeStack.push(std::move(newVar));
 //            }
         }
@@ -85,7 +82,7 @@ Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& terminator
         nodeStack.push(std::move(binaryOp));
     }
 
-    // only one node left in nodeStack now
+    // only one node left in nodeStack now (hopefully)
     auto retNode = std::move(nodeStack.top());
     nodeStack.pop();
 
@@ -113,9 +110,7 @@ Parser::parseStatement(std::vector<Token>::iterator& t, const std::string& termi
         type = t->type();
         if (type == "ASSIGN") {
             auto assign = std::make_unique<AssignNode>();
-            assign->lhs = std::make_unique<VarNode>();
-
-            assign->lhs->name = identName;
+            assign->lhs = std::make_unique<VarNode>(identName);
 
             consume(t, "ASSIGN");
 
@@ -125,12 +120,10 @@ Parser::parseStatement(std::vector<Token>::iterator& t, const std::string& termi
 
         // var declaration
         else if (type == "IDENT") {
-            auto decl = std::make_unique<DeclNode>();
-            decl->var = std::make_unique<VarNode>();
-            decl->type = std::make_unique<TypeNode>();
-
-            decl->var->name = identName;
-            decl->type->name = t->name();
+            auto decl = std::make_unique<DeclNode>(
+                std::make_unique<VarNode>(identName),
+                std::make_unique<TypeNode>(t->name())
+                );
 
             consume(t, "IDENT");
             consume(t, "TERM");
@@ -139,9 +132,7 @@ Parser::parseStatement(std::vector<Token>::iterator& t, const std::string& termi
         // inferred var initialization
         else if (type == "INFERDECL") {
             auto inferdecl = std::make_unique<InferDeclNode>();
-            inferdecl->lhs = std::make_unique<VarNode>();
-
-            inferdecl->lhs->name = identName;
+            inferdecl->lhs = std::make_unique<VarNode>(identName);
 
             consume(t, "INFERDECL");
 
@@ -171,8 +162,7 @@ Parser::parseStatement(std::vector<Token>::iterator& t, const std::string& termi
                         consume(t, "IDENT");
                         if (t->type() == "IDENT") {
                             // get type name //
-                            argNode->type = std::make_unique<TypeNode>();
-                            argNode->type->name = t->name();
+                            argNode->type = std::make_unique<TypeNode>(t->name());
 
                             structNode->fields.push_back(std::move(argNode));
 
@@ -193,8 +183,7 @@ Parser::parseStatement(std::vector<Token>::iterator& t, const std::string& termi
                 auto funcNode = std::make_unique<FuncDeclNode>();
                 funcNode->name = identName;
 
-                funcNode->returnType = std::make_unique<TypeNode>();
-                funcNode->returnType->name = "void";
+                funcNode->returnType = std::make_unique<TypeNode>("void");
 
                 // TODO: Refactor this (?)
                 // parse optional args + return type
@@ -218,8 +207,7 @@ Parser::parseStatement(std::vector<Token>::iterator& t, const std::string& termi
                         consume(t, "IDENT");
                         if (t->type() == "IDENT") {
                             // get type name //
-                            argNode->type = std::make_unique<TypeNode>();
-                            argNode->type->name = t->name();
+                            argNode->type = std::make_unique<TypeNode>(t->name());
                             funcNode->args.push_back(std::move(argNode));
 
                             consume(t, "IDENT");

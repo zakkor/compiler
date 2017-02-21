@@ -1,6 +1,11 @@
 #include "declnode.hpp"
 #include "error.hpp"
 
+DeclNode::DeclNode(std::unique_ptr<VarNode> var,
+                   std::unique_ptr<TypeNode> type)
+    : var(std::move(var)), type(std::move(type))
+{}
+
 void DeclNode::check(std::vector<SymbolTable>& tables) {
     if (wasDeclared(tables, var->name)) {
         throw SemanticException("error: multiple definition of '" + var->name + "'");
