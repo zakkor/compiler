@@ -36,7 +36,7 @@ Parser::parseExpr(std::vector<Token>::iterator& t, const std::string& terminator
             //     --t;
             auto newVar = std::make_unique<VarNode>();
             newVar->name = t->name();
-            newVar->val = 0;
+//            newVar->val = 0;
 
             nodeStack.push(std::move(newVar));
 //            }
@@ -134,7 +134,7 @@ Parser::parseStatement(std::vector<Token>::iterator& t, const std::string& termi
 
             consume(t, "IDENT");
             consume(t, "TERM");
-            return std::move(decl);
+            return decl;
         }
         // inferred var initialization
         else if (type == "INFERDECL") {
@@ -146,7 +146,7 @@ Parser::parseStatement(std::vector<Token>::iterator& t, const std::string& termi
             consume(t, "INFERDECL");
 
             inferdecl->rhs = parseExpr(t, "TERM");
-            return std::move(inferdecl);
+            return inferdecl;
         }
         // func or struct
         else if (type == "HASTYPE") {
@@ -186,7 +186,7 @@ Parser::parseStatement(std::vector<Token>::iterator& t, const std::string& termi
                 // refactor until here
 
                 consume(t, "CBRACE");
-                return std::move(structNode);
+                return structNode;
             }
             // function
             else {
@@ -247,7 +247,7 @@ Parser::parseStatement(std::vector<Token>::iterator& t, const std::string& termi
 
                 consume(t, "CBRACE");
 
-                return std::move(funcNode);
+                return funcNode;
             }
         }
     }
@@ -267,7 +267,7 @@ Parser::parseStatement(std::vector<Token>::iterator& t, const std::string& termi
         // there can be no else after this because we have
         // reached the end of the token stream
         if (t == tokens.end()) {
-            return std::move(ifNode);
+            return ifNode;
         }
 
         // will be either an ELSE or the next statement
@@ -284,14 +284,14 @@ Parser::parseStatement(std::vector<Token>::iterator& t, const std::string& termi
 
             consume(t, "CBRACE");
         }
-        return std::move(ifNode);
+        return ifNode;
     }
     // @TODO: restrict context(functionBody)
     else if (type == "KEYRET") {
         consume(t, "KEYRET");
         auto retNode = std::make_unique<RetNode>();
         retNode->toReturn = parseExpr(t, "TERM");
-        return std::move(retNode);
+        return retNode;
     }
 }
 

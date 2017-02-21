@@ -49,6 +49,6 @@ int main(int argc, char* argv[]) {
         }
 
         std::cout << "-----------------------------------\n";
-        //par.print();
+        par.print();
     }
 }

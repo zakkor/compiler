@@ -13,8 +13,8 @@ void DeclNode::check(std::vector<SymbolTable>& tables) {
         }
 
         tables.back().emplace(std::make_pair(var->name, SymbolInfo("var", type->name, varScope)));
-        std::cout << "new var added to table: named " << var->name << ", type: "
-                  << type->name << ", scope: " << varScope << "\n";
+//        std::cout << "new var added to table: named " << var->name << ", type: "
+//                  << type->name << ", scope: " << varScope << "\n";
     }
 }
 

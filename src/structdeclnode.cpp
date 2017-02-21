@@ -16,7 +16,7 @@ void StructDeclNode::check(std::vector<SymbolTable>& tables) {
             throw SemanticException("error: struct '" + name + "' can only be declared in the global scope");
         }
         tables.back().emplace(std::make_pair(name, SymbolInfo("struct", "???", structScope)));
-        std::cout << "new struct added to table: named " << name << ", scope: " << structScope << "\n";
+//        std::cout << "new struct added to table: named " << name << ", scope: " << structScope << "\n";
     }
 
     // make a new scope for the fields
@@ -24,8 +24,8 @@ void StructDeclNode::check(std::vector<SymbolTable>& tables) {
 
     for (const auto& f : fields) {
         tables.back().emplace(std::make_pair(f->name, SymbolInfo("field", f->type->name, "local")));
-        std::cout << "new field added to table: named " << f->name << ", type: "
-                  << f->type->name << ", scope: " << "local" << "\n";
+//        std::cout << "new field added to table: named " << f->name << ", type: "
+//                  << f->type->name << ", scope: " << "local" << "\n";
     }
 
     tables.pop_back();

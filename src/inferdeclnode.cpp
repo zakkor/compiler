@@ -13,8 +13,8 @@ void InferDeclNode::check(std::vector<SymbolTable>& tables) {
         }
 
         tables.back().emplace(std::make_pair(lhs->name, SymbolInfo("var", rhs->getType(), varScope)));
-        std::cout << "new var added to table: named " << lhs->name << ", type: "
-                  << rhs->getType() << ", scope: " << varScope << "\n";
+//        std::cout << "new var added to table: named " << lhs->name << ", type: "
+//                  << rhs->getType() << ", scope: " << varScope << "\n";
     }
 }
 

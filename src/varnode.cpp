@@ -4,7 +4,7 @@
 
 void VarNode::print() {
     std::cout << currentNode << ";\n";
-    std::cout << currentNode << "[label=\"Var\\nname=" << name << ", val=" << val << "\"];" << std::endl;
+    std::cout << currentNode << "[label=\"Var\\nname=" << name << "\"];" << std::endl;
 }
 
 void VarNode::check(std::vector<SymbolTable>& tables) {
