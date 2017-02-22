@@ -8,6 +8,7 @@
 class ASTNode {
 public:
     ASTNode();
+    virtual ~ASTNode() {}
 
     virtual void execute();
     virtual int get();
