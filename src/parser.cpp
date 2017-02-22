@@ -283,6 +283,22 @@ Parser::parseStatement(std::vector<Token>::iterator& t, const std::string& termi
     }
 }
 
+void Parser::consume(std::vector<Token>::iterator& t, const std::string& requiredType) {
+    auto type = t->type();
+
+    auto errorMsg = "illegal token: have '" + type + "', need '"
+        + requiredType + "'";
+
+    if (type != requiredType) {
+        if (requiredType == "TERM") {
+            errorMsg += "\nnote: you are probably missing a semicolon";
+        }
+        throw SyntacticException(t, errorMsg);
+    }
+
+    ++t; // eat token
+}
+
 void Parser::parse(std::vector<Token> tokens) {
     this->tokens = tokens;
     root = std::make_unique<SequenceNode>();

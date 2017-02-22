@@ -35,21 +35,7 @@ public:
     std::unique_ptr<ASTNode>
     parseStatement(std::vector<Token>::iterator& t, const std::string& terminator);
 
-    static inline void consume(std::vector<Token>::iterator& t, const std::string& requiredType) {
-        auto type = t->type();
-
-        auto errorMsg = "illegal token: have '" + type + "', need '"
-            + requiredType + "'";
-
-        if (type != requiredType) {
-            if (requiredType == "TERM") {
-                errorMsg += "\nnote: you are probably missing a semicolon";
-            }
-            throw SyntacticException(t, errorMsg);
-        }
-
-        ++t; // eat token
-    }
+    void consume(std::vector<Token>::iterator& t, const std::string& requiredType);
 
     void print();
     std::unique_ptr<SequenceNode> root;
