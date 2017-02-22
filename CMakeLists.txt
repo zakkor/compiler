@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
-project(Compiler)
+
+set(PROJECT_NAME compiler)
+
+project(${PROJECT_NAME})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
@@ -27,12 +30,12 @@ set(SOURCE_FILES
   src/structdeclnode.cpp
   )
 
-add_executable(Compiler ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-add_custom_command(TARGET Compiler POST_BUILD
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  ${CMAKE_SOURCE_DIR}/lang $<TARGET_FILE_DIR:Compiler>)
+  ${CMAKE_SOURCE_DIR}/lang $<TARGET_FILE_DIR:${PROJECT_NAME}>)
 
-add_custom_command(TARGET Compiler POST_BUILD
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  ${CMAKE_SOURCE_DIR}/tests $<TARGET_FILE_DIR:Compiler>)
+  ${CMAKE_SOURCE_DIR}/tests $<TARGET_FILE_DIR:${PROJECT_NAME}>)
