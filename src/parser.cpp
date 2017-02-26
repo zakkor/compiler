@@ -309,5 +309,6 @@ void Parser::parse(std::vector<Token> tokens) {
 }
 
 void Parser::print() {
+    std::cout << "-----------------------------------\n";
     root->print();
 }

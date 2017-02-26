@@ -11,12 +11,11 @@
 
 class Lexer {
 public:
-    Lexer(bool showInput = false);
+    Lexer();
 
-    void scan(const std::string& filename);
-    void print();
+    void scan(const std::string& filename, bool printInput, bool shouldPrintTokens);
+    void printTokens();
 
     std::vector<std::vector<std::pair<std::string, std::string>>> rules;
     std::vector<Token> tokens;
-    bool showInput;
 };

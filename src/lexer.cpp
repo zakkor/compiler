@@ -1,7 +1,7 @@
 #include "lexer.hpp"
 #include <iomanip>
 
-Lexer::Lexer(bool showInput) : showInput(showInput) {
+Lexer::Lexer() {
     std::vector<std::pair<std::string, std::string>> staticRules, paramRules;
 
     paramRules = {
@@ -38,7 +38,8 @@ Lexer::Lexer(bool showInput) : showInput(showInput) {
     rules.push_back(staticRules);
 }
 
-void Lexer::print() {
+void Lexer::printTokens() {
+    std::cout << "-----------------------------------\n";
     std::cout << "Lexer output:\n[\n";
     for (auto tok : tokens) {
         std::cout << tok.full() << std::endl;
@@ -47,10 +48,10 @@ void Lexer::print() {
     std::cout << "-----------------------------------\n";
 }
 
-void Lexer::scan(const std::string& filename) {
+void Lexer::scan(const std::string& filename, bool printInput, bool shouldPrintTokens) {
     std::ifstream file(filename);
 
-    if (showInput) {
+    if (printInput) {
         std::cout << "Input is:\n";
     }
 
@@ -58,7 +59,7 @@ void Lexer::scan(const std::string& filename) {
     std::string line;
     while (std::getline(file, line)) {
         tokNumber = 1;
-        if (showInput) {
+        if (printInput) {
             std::cout << std::setfill('0') << std::setw(2) << lineNumber << " | " << line << "\n";
         }
 
@@ -83,5 +84,9 @@ void Lexer::scan(const std::string& filename) {
         tokens.insert(tokens.end(), newTokenGroup.begin(), newTokenGroup.end());
 
         lineNumber++;
+    }
+
+    if (shouldPrintTokens) {
+        printTokens();
     }
 }

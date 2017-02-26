@@ -20,7 +20,7 @@ bool Tester::runAll() {
 
         try {
             Lexer lex;
-            lex.scan(filename);
+            lex.scan(filename, false, false);
             Parser par;
             par.parse(lex.tokens);
 
